@@ -1,10 +1,11 @@
 import pygame
-import sys
+import math
+ini_pos = (100,360)
 class Ray:
     def __init__(self,dir):
-        self.dir = dir
-        self.speed = 5
-        self.pos = [100,360]
+        self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]
+        self.speed = 20
+        self.pos = [ini_pos[0],ini_pos[1]]
     def move(self,dt):
         self.pos[0] = self.pos[0] + (self.dir[0]*self.speed*dt)
         self.pos[1] = self.pos[1] + (self.dir[1]*self.speed*dt)
@@ -15,21 +16,19 @@ vel = pygame.math.Vector2(2,3)
 running = True
 dt=0.0
 screen.fill((0,255,0))
-p_ball = (100,100)
-r = Ray((1,0))
-print(r.pos)
-r.move(1)
-print(r.pos)
+rays = []
 while running:
     #screen.fill((0,255,0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            p_ball = event.pos
-    dt += clock.tick(60)/1000.0
-    p_ball += (dt*vel)
-    pygame.draw.circle(screen,(255,0,0),p_ball,3)
+            print(event.pos)
+            rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
+    dt = clock.tick(60)/1000.0
+    for ray in rays:
+        pygame.draw.circle(screen,(255,0,0),ray.pos,3)
+        ray.move(dt)
     pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
     pygame.display.flip()
 pygame.quit()
