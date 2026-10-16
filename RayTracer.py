@@ -13,6 +13,17 @@ class Ray:
         self.start[1] = self.start[1] + (self.dir[1]*self.speed*dt)
         self.end[0] = self.end[0] + (self.dir[0]*self.speed*dt)
         self.end[1] = self.end[1] + (self.dir[1]*self.speed*dt)
+class Dragable:
+    def __init__(self,drag):
+        self.drag = drag
+    def is_close(self,point,dis=5):
+        size = math.sqrt((self.drag.end[0]-self.drag.start[0])**2 + (self.drag.end[1]-self.drag.start[1])**2)
+        mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
+        dist = math.sqrt((point[0]-mid[0])**2 + (point[1]-mid[1])**2)
+        if (dist<(size+dis)):
+            return True
+        else:
+            return False
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
@@ -21,18 +32,20 @@ running = True
 dt=0.0
 screen.fill((0,255,0))
 rays = []
+drag_test = Dragable(Ray((0,1)))
 while running:
     screen.fill((0,255,0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print(event.pos)
+            print(drag_test.is_close(event.pos))
             rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
     dt = clock.tick(60)/1000.0
     for ray in rays:
         pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
         ray.move(dt)
     pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
+    pygame.draw.line(screen,(255,0,0),drag_test.drag.start,drag_test.drag.end,3)
     pygame.display.flip()
 pygame.quit()
