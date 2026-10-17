@@ -16,6 +16,7 @@ class Ray:
 class Dragable:
     def __init__(self,drag):
         self.drag = drag
+        self.dragging = False
     def is_close(self,point,dis=5):
         size = math.sqrt((self.drag.end[0]-self.drag.start[0])**2 + (self.drag.end[1]-self.drag.start[1])**2)
         mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
@@ -24,6 +25,17 @@ class Dragable:
             return True
         else:
             return False
+    def move(self,dis):
+        self.drag.start[0] += dis[0]
+        self.drag.start[1] += dis[1]
+        self.drag.end[0] += dis[0]
+        self.drag.end[1] += dis[1]
+    def move_to(self,point):
+        mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
+        self.drag.start[0] += point[0]-mid[0]
+        self.drag.start[1] += point[1]-mid[1]
+        self.drag.end[0] += point[0]-mid[0]
+        self.drag.end[1] += point[1]-mid[1]
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
@@ -39,8 +51,14 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            print(drag_test.is_close(event.pos))
             rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
+            if drag_test.is_close(event.pos):
+                drag_test.dragging = True
+        elif event.type == pygame.MOUSEMOTION:
+            if drag_test.dragging:
+                drag_test.move_to(pygame.mouse.get_pos())
+        elif event.type == pygame.MOUSEBUTTONUP:
+            drag_test.dragging = False
     dt = clock.tick(60)/1000.0
     for ray in rays:
         pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
