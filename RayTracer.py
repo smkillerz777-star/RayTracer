@@ -26,10 +26,11 @@ class Dragable:
         self.drag = drag
         self.dragging = False
         self.rotating = False
+        self.mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
     def is_close(self,point,dis=5):
+        self.mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]        
         size = math.sqrt((self.drag.end[0]-self.drag.start[0])**2 + (self.drag.end[1]-self.drag.start[1])**2)
-        mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
-        dist = math.sqrt((point[0]-mid[0])**2 + (point[1]-mid[1])**2)
+        dist = math.sqrt((point[0]-self.mid[0])**2 + (point[1]-self.mid[1])**2)
         if (dist<(size+dis)):
             return True
         else:
@@ -78,12 +79,32 @@ class Dragable:
         nsq = np.dot(nor,nor)
         r = dir1 - 2 * np.dot(dir1,nor) / nsq * nor
         return r
-    def angle_bet(self,dir):
+    def angle_bet(self,dir,di=0):
+        if di==0:
+            di = self.drag.dir
         dir1 = np.array(dir,dtype=float)
-        dir2 = np.array(self.drag.dir,dtype=float)
+        dir2 = np.array(di,dtype=float)
         dot_product = np.dot(dir1,dir2)
         cos = np.clip(dot_product,-1.0,1.0)
-        return np.arccos(cos)*180/3.14
+        return np.arccos(cos)
+
+    def rotate_point(self,angle,p1,p2=0):
+        self.mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
+        if p2==0:
+            p2 = [self.mid[0],self.mid[1]]
+        print(p1[0])
+        dx = p1[0] - p2[0]
+        dy = p1[1] - p2[1]
+        x = (dx * math.cos(angle) - dy * math.sin(angle)) + p2[0]
+        y = (dx * math.sin(angle) + dy * math.cos(angle)) + p2[1]
+        print(x)
+        return [x,y]
+
+    def rotate(self,angle):
+        #print(self.drag.start)
+        self.drag.start = self.rotate_point(angle,self.drag.start)
+        #print(self.drag.start)
+        self.drag.end = self.rotate_point(angle,self.drag.end)
 
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
@@ -95,6 +116,7 @@ screen.fill((0,255,0))
 rays = []
 drag_test = Dragable(Ray((1,0),200))
 while running:
+    mouse_pos = pygame.mouse.get_pos()
     screen.fill((0,255,0))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -109,7 +131,10 @@ while running:
                 rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
         elif event.type == pygame.MOUSEMOTION:
             if drag_test.dragging:
-                drag_test.move_to(pygame.mouse.get_pos())
+                drag_test.move_to(mouse_pos)
+            if drag_test.rotating:
+                angle = drag_test.angle_bet([mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]])
+                drag_test.rotate(angle)
         elif event.type == pygame.MOUSEBUTTONUP:
             drag_test.dragging = False
             drag_test.rotating = False
@@ -117,7 +142,6 @@ while running:
     for ray in rays:
         pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
         if(drag_test.is_colliding(ray)):
-            print(drag_test.angle_bet(ray.dir))
             ray.change_dir(drag_test.reflect(ray.dir))
         ray.move(dt)
     pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
