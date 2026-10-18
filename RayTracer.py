@@ -155,8 +155,9 @@ while running:
                     #print(angle)
                     prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
         elif event.type == pygame.MOUSEBUTTONUP:
-            drag_test.dragging = False
-            drag_test.rotating = False
+            for drag_test in drags:
+                drag_test.dragging = False
+                drag_test.rotating = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_f:
                 drags.append(Dragable(Ray((1,0),200)))
@@ -168,6 +169,7 @@ while running:
                 ray.change_dir(drag_test.reflect(ray.dir))
         ray.move(dt)
     pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
-    pygame.draw.line(screen,(255,0,0),drag_test.drag.start,drag_test.drag.end,3)
+    for drag_test in drags:
+        pygame.draw.line(screen,(255,0,0),drag_test.drag.start,drag_test.drag.end,3)
     pygame.display.flip()
 pygame.quit()
