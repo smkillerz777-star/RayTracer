@@ -46,12 +46,24 @@ class Dragable:
         max_y_ray = max(ray.end[1],ray.start[0])
         min_x_ray = min(ray.end[0],ray.start[0])
         min_y_ray = min(ray.end[1],ray.start[1])
-        mid_drag = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
-        mid_ray = [(ray.end[0]+ray.start[0])/2,(ray.end[1]+ray.start[1])/2]
-        disp = Ray((mid_drag[0]-mid_ray[0],mid_drag[1]-mid_ray[1]))
-        if((abs(disp.slope)-abs(ray.slope))<0.1):
-            return True
-        return False
+        return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1])
+    def segmentIntersect(self,x1,y1,x2,y2,x3,y3,x4,y4):
+        denom = (y4-y3)*(x2-x1)-(x4-x3)*(y2-y1)
+        if(denom==0):
+            cross = (x3-x3)*(y2-y1)-(y3-y1)*(x2-x1)
+            if(cross != 0): return False
+            dx = x2-x1
+            dy = y2-y1
+            lensq = dx*dx+dy*dy
+            t3 = ((x3-x1)*dx+(y3-y1)*dy)/lensq
+            t4 = ((x4-x1)*dx+(y4-y1)*dy)/lensq
+            tMin = min(t3,t4)
+            tMax = max(t3,t4)
+            return (max(0,tMin) <= min(1,tMax))
+        s = ((x4-x3)*(y1-y3)-(y4-y3)*(x1-x3))/denom
+        t = ((x2-x1)*(y1-y3)-(y2-y1)*(x1-x3))/denom
+        return (s>=0 and s<=1) and (t>=0 and t<=1)
+
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
