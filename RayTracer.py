@@ -125,7 +125,7 @@ running = True
 dt=0.0
 screen.fill((0,255,0))
 rays = []
-drag_test = Dragable(Ray((1,0),200))
+drags = [Dragable(Ray((1,0),200))]
 prev = 0
 while running:
     mouse_pos = pygame.mouse.get_pos()
@@ -134,30 +134,38 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN:
-            if drag_test.is_close(event.pos):
-                if event.button == 1:
-                    drag_test.dragging = True
-                elif event.button == 3:
-                    drag_test.rotating = True
-                    prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
+            for drag_test in drags:
+                if drag_test.is_close(event.pos):
+                    if event.button == 1:
+                        drag_test.dragging = True
+                        break
+                    elif event.button == 3:
+                        drag_test.rotating = True
+                        prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
+                        break
             else:
                 rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
         elif event.type == pygame.MOUSEMOTION:
-            if drag_test.dragging:
-                drag_test.move_to(mouse_pos)
-            if drag_test.rotating:
-                angle = drag_test.angle_bet([mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]],prev)
-                drag_test.rotate(angle)
-                #print(angle)
-                prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
+            for drag_test in drags:
+                if drag_test.dragging:
+                    drag_test.move_to(mouse_pos)
+                if drag_test.rotating:
+                    angle = drag_test.angle_bet([mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]],prev)
+                    drag_test.rotate(angle)
+                    #print(angle)
+                    prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
         elif event.type == pygame.MOUSEBUTTONUP:
             drag_test.dragging = False
             drag_test.rotating = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_f:
+                drags.append(Dragable(Ray((1,0),200)))
     dt = clock.tick(60)/1000.0
     for ray in rays:
         pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
-        if(drag_test.is_colliding(ray)):
-            ray.change_dir(drag_test.reflect(ray.dir))
+        for drag_test in drags:
+            if(drag_test.is_colliding(ray)):
+                ray.change_dir(drag_test.reflect(ray.dir))
         ray.move(dt)
     pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
     pygame.draw.line(screen,(255,0,0),drag_test.drag.start,drag_test.drag.end,3)
