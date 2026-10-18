@@ -80,24 +80,17 @@ class Dragable:
         r = dir1 - 2 * np.dot(dir1,nor) / nsq * nor
         return r
     def angle_bet(self,dir,di):
-        print(di)
         dir1 = np.array(dir,dtype=float)
         dir2 = np.array(di,dtype=float)
         nor1 = np.linalg.norm(dir1)
-        #print(nor1)
         nor2 = np.linalg.norm(dir2)
+        cross_product = dir1[0] * dir2[1] - dir1[1] * dir2[0]
         if nor1==0 or nor2==0:
             return 0.0
-        #print(nor2)
         dot_product = np.dot(dir1,dir2)
         cos = np.clip(dot_product/(nor1*nor2),-1.0,1.0)
-        #print(cos)
         angle_val = np.arccos(cos)
-        #print(angle_val)
-        if hasattr(angle_val, 'item') and angle_val.size == 1:
-            return float(angle_val.item())
-        elif hasattr(angle_val, 'flat') and angle_val.size > 0:
-            return float(angle_val.flat[0])
+        angle_val = -1*np.arctan2(cross_product, dot_product)
         return float(angle_val)
 
     def rotate_point(self,angle,p1,p2=0):
