@@ -1,11 +1,11 @@
 import pygame
 import math
+import numpy as np
 ini_pos = (100,360)
 class Ray:
     def __init__(self,dir):
         self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]
         self.speed = 60
-        self.slope = self.dir[1]/self.dir[0]
         self.size = 10
         self.start = [ini_pos[0],ini_pos[1]]
         self.end = [ini_pos[0] + self.dir[0]*self.size,ini_pos[1] + self.dir[1]*self.size]
@@ -63,6 +63,13 @@ class Dragable:
         s = ((x4-x3)*(y1-y3)-(y4-y3)*(x1-x3))/denom
         t = ((x2-x1)*(y1-y3)-(y2-y1)*(x1-x3))/denom
         return (s>=0 and s<=1) and (t>=0 and t<=1)
+    def reflect(self,dir):
+        dir1 = np.array(dir,dtype=float)
+        dir2 = np.array(self.drag.dir,dtype=float)
+        nor = np.array([-dir2[1],dir2[0]],dtype=float)
+        nsq = np.dot(nor,nor)
+        r = dir1 - 2 * np.dot(dir1,nor) / nsq * nor
+        return r
 
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
@@ -91,7 +98,7 @@ while running:
     for ray in rays:
         pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
         if(drag_test.is_colliding(ray)):
-            print(ray)
+            ray.dir = drag_test.reflect(ray.dir)
         ray.move(dt)
     pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
     pygame.draw.line(screen,(255,0,0),drag_test.drag.start,drag_test.drag.end,3)
