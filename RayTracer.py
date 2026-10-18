@@ -84,20 +84,20 @@ class Dragable:
             di = self.drag.dir
         dir1 = np.array(dir,dtype=float)
         dir2 = np.array(di,dtype=float)
+        nor1 = np.linalg.norm(dir1)
+        nor2 = np.linalg.norm(dir2)
         dot_product = np.dot(dir1,dir2)
-        cos = np.clip(dot_product,-1.0,1.0)
+        cos = np.clip(dot_product/(nor1*nor2),-1.0,1.0)
         return np.arccos(cos)
 
     def rotate_point(self,angle,p1,p2=0):
         self.mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
         if p2==0:
             p2 = [self.mid[0],self.mid[1]]
-        print(p1[0])
         dx = p1[0] - p2[0]
         dy = p1[1] - p2[1]
         x = (dx * math.cos(angle) - dy * math.sin(angle)) + p2[0]
         y = (dx * math.sin(angle) + dy * math.cos(angle)) + p2[1]
-        print(x)
         return [x,y]
 
     def rotate(self,angle):
@@ -116,6 +116,7 @@ screen.fill((0,255,0))
 rays = []
 drag_test = Dragable(Ray((1,0),200))
 while running:
+    prev = 0
     mouse_pos = pygame.mouse.get_pos()
     screen.fill((0,255,0))
     for event in pygame.event.get():
@@ -127,14 +128,17 @@ while running:
                     drag_test.dragging = True
                 elif event.button == 3:
                     drag_test.rotating = True
+                    prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
             else:
                 rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
         elif event.type == pygame.MOUSEMOTION:
             if drag_test.dragging:
                 drag_test.move_to(mouse_pos)
             if drag_test.rotating:
-                angle = drag_test.angle_bet([mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]])
+                angle = drag_test.angle_bet([mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]],prev)
                 drag_test.rotate(angle)
+                print(angle)
+                prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
         elif event.type == pygame.MOUSEBUTTONUP:
             drag_test.dragging = False
             drag_test.rotating = False
