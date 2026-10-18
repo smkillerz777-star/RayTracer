@@ -107,6 +107,15 @@ class Dragable:
         new_start = self.rotate_point(angle,self.drag.start,p2=self.mid)
         self.drag.end = self.rotate_point(angle,self.drag.end,p2=self.mid)
         self.drag.start = new_start
+        self.rotate_dir(angle)
+
+    def rotate_dir(self,angle):
+        x,y = self.drag.dir
+        cos = math.cos(angle)
+        sin = math.sin(angle)
+        nx = x*cos-y*sin
+        ny = x*sin+y*cos
+        self.drag.dir = [nx,ny]
 
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
