@@ -9,11 +9,18 @@ class Ray:
         self.size = 10
         self.start = [ini_pos[0],ini_pos[1]]
         self.end = [ini_pos[0] + self.dir[0]*self.size,ini_pos[1] + self.dir[1]*self.size]
+
     def move(self,dt):
         self.start[0] = self.start[0] + (self.dir[0]*self.speed*dt)
         self.start[1] = self.start[1] + (self.dir[1]*self.speed*dt)
         self.end[0] = self.end[0] + (self.dir[0]*self.speed*dt)
         self.end[1] = self.end[1] + (self.dir[1]*self.speed*dt)
+
+    def change_dir(self,dir):
+        self.dir = dir
+        self.start = [self.end[0],self.end[1]]
+        self.end = [self.start[0]+dir[0]*self.size,self.start[1]+dir[1]*self.size]
+
 class Dragable:
     def __init__(self,drag):
         self.drag = drag
@@ -98,7 +105,7 @@ while running:
     for ray in rays:
         pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
         if(drag_test.is_colliding(ray)):
-            ray.dir = drag_test.reflect(ray.dir)
+            ray.change_dir(drag_test.reflect(ray.dir))
         ray.move(dt)
     pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
     pygame.draw.line(screen,(255,0,0),drag_test.drag.start,drag_test.drag.end,3)
