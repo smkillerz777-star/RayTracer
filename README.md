@@ -4,6 +4,11 @@ a python project that uses pygame to simulate light behaiviour on interacting wi
  open https://swastik-gupta.itch.io/raytracer \
  download the zip file and extact it \
  run the application
+ # Features
+ A mirror is created on pressing f \
+ on left clicking when close to a mirror the mirror translate and follows mouse \
+ on right clicking when close to a mirror the mirror rotates \
+ on left clicking when away from all mirrors a ray is shooted
  # Tech Stack
  vs code\
  python\
