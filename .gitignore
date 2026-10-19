@@ -1,15 +1,2 @@
-build/RayTracer/Analysis-00.toc
-build/RayTracer/base_library.zip
-build/RayTracer/EXE-00.toc
-build/RayTracer/localpycs/pyimod01_archive.pyc
-build/RayTracer/localpycs/pyimod02_importers.pyc
-build/RayTracer/localpycs/pyimod03_ctypes.pyc
-build/RayTracer/localpycs/pyimod04_pywin32.pyc
-build/RayTracer/localpycs/struct.pyc
-build/RayTracer/PKG-00.toc
-build/RayTracer/PYZ-00.pyz
-build/RayTracer/PYZ-00.toc
-build/RayTracer/RayTracer.pkg
-build/RayTracer/warn-RayTracer.txt
-build/RayTracer/xref-RayTracer.html
-dist/RayTracer.exe
+.venv
+web_build
