@@ -10,12 +10,16 @@ class Ray:
         self.size = size
         self.start = [ini_pos[0],ini_pos[1]]
         self.end = [ini_pos[0] + self.dir[0]*self.size,ini_pos[1] + self.dir[1]*self.size]
+        self.mid = [(self.end[0]+self.start[0])/2,(self.end[1]+self.start[1])/2]
+        self.size = math.sqrt((self.end[0]-self.start[0])**2 + (self.end[1]-self.start[1])**2)
 
     def move(self,dt):
         self.start[0] = self.start[0] + (self.dir[0]*self.speed*dt)
         self.start[1] = self.start[1] + (self.dir[1]*self.speed*dt)
         self.end[0] = self.end[0] + (self.dir[0]*self.speed*dt)
         self.end[1] = self.end[1] + (self.dir[1]*self.speed*dt)
+        self.mid[0] = self.mid[0] + (self.dir[0]*self.speed*dt)
+        self.mid[1] = self.mid[1] + (self.dir[1]*self.speed*dt)
 
     def change_dir(self,dir):
         self.dir = dir
@@ -29,8 +33,8 @@ class Arc:
     def __init__(self,angle,rad):
         self.rad = rad
         self.angle = angle
-        self.end = [0,0]
-        self.start = [0,0]
+        self.end = [ini_pos[0],ini_pos[1]]
+        self.start = [ini_pos[0],ini_pos[1]]
 
     def draw(self):
         pygame.draw.arc(screen,(0,50,255),(ini_pos[0]-self.rad,ini_pos[1]-self.rad,self.rad*2,self.rad*2),-self.angle/2,self.angle/2)
@@ -40,12 +44,12 @@ class Dragable:
         self.drag = drag
         self.dragging = False
         self.rotating = False
-        self.mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
+
     def is_close(self,point,dis=5):
-        self.mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]        
-        size = math.sqrt((self.drag.end[0]-self.drag.start[0])**2 + (self.drag.end[1]-self.drag.start[1])**2)
-        dist = math.sqrt((point[0]-self.mid[0])**2 + (point[1]-self.mid[1])**2)
-        if (dist<(size+dis)):
+        dis += self.drag.size
+        print(self.drag.mid)
+        dist = math.sqrt((point[0]-self.drag.mid[0])**2 + (point[1]-self.drag.mid[1])**2)
+        if (dist<dis):
             return True
         else:
             return False
@@ -54,12 +58,17 @@ class Dragable:
         self.drag.start[1] += dis[1]
         self.drag.end[0] += dis[0]
         self.drag.end[1] += dis[1]
+        self.drag.mid[0] += dis[0]
+        self.drag.mid[1] += dis[1]
     def move_to(self,point):
         mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
         self.drag.start[0] += point[0]-mid[0]
         self.drag.start[1] += point[1]-mid[1]
         self.drag.end[0] += point[0]-mid[0]
         self.drag.end[1] += point[1]-mid[1]
+        self.drag.mid[0] = point[0]
+        self.drag.mid[1] = point[1]
+
     def is_colliding(self,ray):
         max_x_drag = max(self.drag.end[0],self.drag.start[0])
         max_y_drag = max(self.drag.end[1],self.drag.start[1])
@@ -143,7 +152,7 @@ async def main():
     dt=0.0
     screen.fill((0,255,0))
     rays = []
-    drags = [Dragable(Arc(1.5,20))]
+    drags = [Dragable(Ray((0,1),10))]
     prev = 0
     while running:
         mouse_pos = pygame.mouse.get_pos()
