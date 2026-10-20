@@ -53,13 +53,7 @@ class Dragable:
             return True
         else:
             return False
-    def move(self,dis):
-        self.drag.start[0] += dis[0]
-        self.drag.start[1] += dis[1]
-        self.drag.end[0] += dis[0]
-        self.drag.end[1] += dis[1]
-        self.drag.mid[0] += dis[0]
-        self.drag.mid[1] += dis[1]
+        
     def move_to(self,point):
         mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
         self.drag.start[0] += point[0]-mid[0]
@@ -126,9 +120,8 @@ class Dragable:
         return [x,y]
 
     def rotate(self,angle):
-        self.mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
-        new_start = self.rotate_point(angle,self.drag.start,p2=self.mid)
-        self.drag.end = self.rotate_point(angle,self.drag.end,p2=self.mid)
+        new_start = self.rotate_point(angle,self.drag.start,p2=self.drag.mid)
+        self.drag.end = self.rotate_point(angle,self.drag.end,p2=self.drag.mid)
         self.drag.start = new_start
         self.rotate_dir(angle)
 
@@ -152,7 +145,7 @@ async def main():
     dt=0.0
     screen.fill((0,255,0))
     rays = []
-    drags = [Dragable(Ray((0,1),10))]
+    drags = [Dragable(Ray((0,1),100))]
     prev = 0
     while running:
         mouse_pos = pygame.mouse.get_pos()
@@ -168,7 +161,7 @@ async def main():
                             break
                         elif event.button == 3:
                             drag_test.rotating = True
-                            prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
+                            prev = [mouse_pos[0]-drag_test.drag.mid[0],mouse_pos[1]-drag_test.drag.mid[1]]
                             break
                 else:
                     rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
@@ -177,10 +170,9 @@ async def main():
                     if drag_test.dragging:
                         drag_test.move_to(mouse_pos)
                     if drag_test.rotating:
-                        angle = drag_test.angle_bet([mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]],prev)
+                        angle = drag_test.angle_bet([mouse_pos[0]-drag_test.drag.mid[0],mouse_pos[1]-drag_test.drag.mid[1]],prev)
                         drag_test.rotate(angle)
-                        #print(angle)
-                        prev = [mouse_pos[0]-drag_test.mid[0],mouse_pos[1]-drag_test.mid[1]]
+                        prev = [mouse_pos[0]-drag_test.drag.mid[0],mouse_pos[1]-drag_test.drag.mid[1]]
             elif event.type == pygame.MOUSEBUTTONUP:
                 for drag_test in drags:
                     drag_test.dragging = False
