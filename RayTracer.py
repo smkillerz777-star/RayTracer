@@ -33,11 +33,11 @@ class Arc:
     def __init__(self,angle,rad):
         self.rad = rad
         self.angle = angle
-        self.end = [ini_pos[0],ini_pos[1]]
-        self.start = [ini_pos[0],ini_pos[1]]
+        self.mid = [ini_pos[0],ini_pos[1]]
+        self.size = rad
 
     def draw(self):
-        pygame.draw.arc(screen,(0,50,255),(ini_pos[0]-self.rad,ini_pos[1]-self.rad,self.rad*2,self.rad*2),-self.angle/2,self.angle/2)
+        pygame.draw.arc(screen,(0,50,255),(self.mid[0]-self.rad,self.mid[1]-self.rad,self.rad*2,self.rad*2),-self.angle/2,self.angle/2)
 
 class Dragable:
     def __init__(self,drag):
@@ -55,23 +55,16 @@ class Dragable:
             return False
         
     def move_to(self,point):
-        mid = [(self.drag.end[0]+self.drag.start[0])/2,(self.drag.end[1]+self.drag.start[1])/2]
-        self.drag.start[0] += point[0]-mid[0]
-        self.drag.start[1] += point[1]-mid[1]
-        self.drag.end[0] += point[0]-mid[0]
-        self.drag.end[1] += point[1]-mid[1]
+        mid = self.drag.mid
+        if(isinstance(self.drag,Ray)):
+            self.drag.start[0] += point[0]-mid[0]
+            self.drag.start[1] += point[1]-mid[1]
+            self.drag.end[0] += point[0]-mid[0]
+            self.drag.end[1] += point[1]-mid[1]
         self.drag.mid[0] = point[0]
         self.drag.mid[1] = point[1]
 
     def is_colliding(self,ray):
-        max_x_drag = max(self.drag.end[0],self.drag.start[0])
-        max_y_drag = max(self.drag.end[1],self.drag.start[1])
-        min_x_drag = min(self.drag.end[0],self.drag.start[0])
-        min_y_drag = min(self.drag.end[1],self.drag.start[1])
-        max_x_ray = max(ray.end[0],ray.start[0])
-        max_y_ray = max(ray.end[1],ray.start[0])
-        min_x_ray = min(ray.end[0],ray.start[0])
-        min_y_ray = min(ray.end[1],ray.start[1])
         return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1])
     def segmentIntersect(self,x1,y1,x2,y2,x3,y3,x4,y4):
         denom = (y4-y3)*(x2-x1)-(x4-x3)*(y2-y1)
@@ -145,7 +138,7 @@ async def main():
     dt=0.0
     screen.fill((0,255,0))
     rays = []
-    drags = [Dragable(Ray((0,1),100))]
+    drags = [Dragable(Arc(1.5,100))]
     prev = 0
     while running:
         mouse_pos = pygame.mouse.get_pos()
