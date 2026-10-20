@@ -22,6 +22,19 @@ class Ray:
         self.start = [self.end[0],self.end[1]]
         self.end = [self.start[0]+dir[0]*self.size,self.start[1]+dir[1]*self.size]
 
+    def draw(self):
+        pygame.draw.line(screen,(255,0,0),self.start,self.end,3)
+
+class Arc:
+    def __init__(self,angle,rad):
+        self.rad = rad
+        self.angle = angle
+        self.end = [0,0]
+        self.start = [0,0]
+
+    def draw(self):
+        pygame.draw.arc(screen,(0,50,255),(ini_pos[0]-self.rad,ini_pos[1]-self.rad,self.rad*2,self.rad*2),-self.angle/2,self.angle/2)
+
 class Dragable:
     def __init__(self,drag):
         self.drag = drag
@@ -118,6 +131,9 @@ class Dragable:
         ny = x*sin+y*cos
         self.drag.dir = [nx,ny]
 
+    def draw(self):
+        self.drag.draw()
+
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
@@ -127,7 +143,7 @@ async def main():
     dt=0.0
     screen.fill((0,255,0))
     rays = []
-    drags = [Dragable(Ray((1,0),100))]
+    drags = [Dragable(Arc(1.5,20))]
     prev = 0
     while running:
         mouse_pos = pygame.mouse.get_pos()
@@ -171,8 +187,8 @@ async def main():
                     ray.change_dir(drag_test.reflect(ray.dir))
             ray.move(dt)
         pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
-        for drag_test in drags:
-            pygame.draw.line(screen,(255,0,0),drag_test.drag.start,drag_test.drag.end,3)
+        for drag in drags:
+            drag.draw()
         pygame.display.flip()
 asyncio.run(main())
 pygame.quit()
