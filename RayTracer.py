@@ -32,12 +32,13 @@ class Ray:
 class Arc:
     def __init__(self,angle,rad):
         self.rad = rad
-        self.angle = angle
+        self.start_angle = (angle/2) % (2 * math.pi)
+        self.end_angle = (-angle/2) % (2 * math.pi)
         self.mid = [ini_pos[0],ini_pos[1]]
         self.size = rad
 
     def draw(self):
-        pygame.draw.arc(screen,(0,50,255),(self.mid[0]-self.rad,self.mid[1]-self.rad,self.rad*2,self.rad*2),-self.angle/2,self.angle/2)
+        pygame.draw.arc(screen,(0,50,255),(self.mid[0]-self.rad,self.mid[1]-self.rad,self.rad*2,self.rad*2),self.start_angle,self.end_angle)
 
 class Dragable:
     def __init__(self,drag):
@@ -47,7 +48,6 @@ class Dragable:
 
     def is_close(self,point,dis=5):
         dis += self.drag.size
-        print(self.drag.mid)
         dist = math.sqrt((point[0]-self.drag.mid[0])**2 + (point[1]-self.drag.mid[1])**2)
         if (dist<dis):
             return True
@@ -113,10 +113,14 @@ class Dragable:
         return [x,y]
 
     def rotate(self,angle):
-        new_start = self.rotate_point(angle,self.drag.start,p2=self.drag.mid)
-        self.drag.end = self.rotate_point(angle,self.drag.end,p2=self.drag.mid)
-        self.drag.start = new_start
-        self.rotate_dir(angle)
+        if(isinstance(self.drag,Ray)):
+            new_start = self.rotate_point(angle,self.drag.start,p2=self.drag.mid)
+            self.drag.end = self.rotate_point(angle,self.drag.end,p2=self.drag.mid)
+            self.drag.start = new_start
+            self.rotate_dir(angle)
+        elif(isinstance(self.drag,Arc)):
+            self.drag.start_angle -= angle
+            self.drag.end_angle -= angle
 
     def rotate_dir(self,angle):
         x,y = self.drag.dir
