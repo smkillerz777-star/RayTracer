@@ -31,6 +31,11 @@ class Ray:
     def draw(self):
         pygame.draw.line(screen,(255,0,0),self.start,self.end,3)
 
+    def lerp(self,t):
+        x = self.start[0] + t*(self.end[0]-self.start[0])
+        y = self.start[1] + t*(self.end[1]-self.start[1])
+        return [x,y]
+
 class Arc:
     def __init__(self,angle,rad):
         self.rad = rad
@@ -41,6 +46,21 @@ class Arc:
 
     def draw(self):
         pygame.draw.arc(screen,(0,50,255),(self.mid[0]-self.rad,self.mid[1]-self.rad,self.rad*2,self.rad*2),self.start_angle,self.end_angle)
+
+    def is_colliding(self,ray):
+        for t in range(0,11):
+            t=t/10
+            point = ray.lerp(t)
+            dis = math.sqrt((point[0]-self.mid[0])**2 + (point[1]-self.mid[1])**2)
+            if((dis-self.rad)<0.1):
+               ob = Dragable(Ray((1,0),10))
+               dir = [point[0]-self.mid[0],point[1]-self.mid[1]]
+               di = [1,0]
+               angle = (ob.angle_bet(dir,di))%(2*math.pi)
+               if(angle>self.start_angle and angle<self.end_angle):
+                   return True
+               return False
+        return False
 
 class Dragable:
     def __init__(self,drag):
@@ -70,7 +90,8 @@ class Dragable:
         if(isinstance(self.drag,Ray)):
             return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1])
         else:
-            return False
+            return self.drag.is_colliding(ray)
+        
     def segmentIntersect(self,x1,y1,x2,y2,x3,y3,x4,y4):
         denom = (y4-y3)*(x2-x1)-(x4-x3)*(y2-y1)
         if(denom==0):
