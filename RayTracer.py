@@ -67,7 +67,10 @@ class Dragable:
         self.drag.mid[1] = point[1]
 
     def is_colliding(self,ray):
-        return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1])
+        if(isinstance(self.drag,Ray)):
+            return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1])
+        else:
+            return False
     def segmentIntersect(self,x1,y1,x2,y2,x3,y3,x4,y4):
         denom = (y4-y3)*(x2-x1)-(x4-x3)*(y2-y1)
         if(denom==0):
