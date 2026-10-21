@@ -3,6 +3,8 @@ import math
 import numpy as np
 import asyncio
 ini_pos = (100,360)
+default_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
+motion_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
 class Ray:
     def __init__(self,dir,size=10):
         self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]
@@ -147,6 +149,12 @@ async def main():
     while running:
         mouse_pos = pygame.mouse.get_pos()
         screen.fill((0,255,0))
+        for drag_test in drags:
+            if drag_test.is_close(mouse_pos):
+                pygame.mouse.set_cursor(motion_cursor)
+                break
+        else:
+            pygame.mouse.set_cursor(default_cursor)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
