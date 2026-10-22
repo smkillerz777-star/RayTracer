@@ -13,7 +13,6 @@ class Ray:
         self.start = [ini_pos[0],ini_pos[1]]
         self.end = [ini_pos[0] + self.dir[0]*self.size,ini_pos[1] + self.dir[1]*self.size]
         self.mid = [(self.end[0]+self.start[0])/2,(self.end[1]+self.start[1])/2]
-        self.size = math.sqrt((self.end[0]-self.start[0])**2 + (self.end[1]-self.start[1])**2)
 
     def move(self,dt):
         self.start[0] = self.start[0] + (self.dir[0]*self.speed*dt)
@@ -35,6 +34,12 @@ class Ray:
         x = self.start[0] + t*(self.end[0]-self.start[0])
         y = self.start[1] + t*(self.end[1]-self.start[1])
         return [x,y]
+
+    def change_size(self,ds):
+        rate = 3
+        self.start = [self.mid[0] + self.dir[0]*(self.size+ds)/2*rate,self.mid[1] + self.dir[1]*(self.size+ds)/2*rate]
+        self.end = [self.mid[0] - self.dir[0]*(self.size+ds)/2*rate,self.mid[1] - self.dir[1]*(self.size+ds)/2*rate]
+        self.size += ds*rate
 
 class Arc:
     def __init__(self,angle,rad):
@@ -90,7 +95,7 @@ class Dragable:
 
     def is_colliding(self,ray):
         if(isinstance(self.drag,Ray)):
-            return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1])
+            return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1]),None
         else:
             return self.drag.is_colliding(ray)
         
@@ -194,6 +199,8 @@ async def main():
                         if(isinstance(drag_test.drag,Arc)):
                             drag_test.drag.start_angle = (drag_test.drag.start_angle+event.y/5)
                             drag_test.drag.end_angle = (drag_test.drag.end_angle-event.y/5)
+                        elif(isinstance(drag_test.drag,Ray)):
+                            drag_test.drag.change_size(event.y)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if(event.button in (4,5,6,7)):
                     continue
