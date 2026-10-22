@@ -237,10 +237,6 @@ async def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if(event.button in (4,5,6,7)):
                     continue
-                for shooter in shooters:
-                    if shooter.is_close(event.pos):
-                        shooter.dragging = True
-                        break
                 for drag_test in drags:
                     if drag_test.is_close(event.pos):
                         if event.button == 1:
@@ -252,7 +248,12 @@ async def main():
                             break
                 else:
                     for shooter in shooters:
-                        rays.append(Ray((event.pos[0]-shooter.mid[0],event.pos[1]-shooter.mid[1]),pos=shooter.mid))
+                        if shooter.is_close(event.pos):
+                            shooter.dragging = True
+                            break
+                    else:
+                        for shooter in shooters:
+                            rays.append(Ray((event.pos[0]-shooter.mid[0],event.pos[1]-shooter.mid[1]),pos=shooter.mid))
             elif event.type == pygame.MOUSEMOTION:
                 for shooter in shooters:
                     if(shooter.dragging):
