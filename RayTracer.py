@@ -57,16 +57,12 @@ class Arc:
             dir = [point[0]-self.mid[0],point[1]-self.mid[1]]
             di = [1,0]
             angle = (-ob.angle_bet(dir,di))%(2*math.pi)
-            print(self.rad)
             if(abs(dis-self.rad)<0.5):
-               print("is close")
-               if(self.start_angle<self.end_angle):
-                   print("problem")
                if(self.start_angle<self.end_angle and angle>self.start_angle and angle<self.end_angle):
-                   return True
+                   return True,point
                elif(self.start_angle>self.end_angle and (angle>self.start_angle or angle<self.end_angle)):
-                   return True
-        return False
+                   return True,point
+        return False,None
 
 class Dragable:
     def __init__(self,drag):
@@ -114,10 +110,13 @@ class Dragable:
         s = ((x4-x3)*(y1-y3)-(y4-y3)*(x1-x3))/denom
         t = ((x2-x1)*(y1-y3)-(y2-y1)*(x1-x3))/denom
         return (s>=0 and s<=1) and (t>=0 and t<=1)
-    def reflect(self,dir):
+    def reflect(self,dir,point):
         dir1 = np.array(dir,dtype=float)
-        dir2 = np.array(self.drag.dir,dtype=float)
-        nor = np.array([-dir2[1],dir2[0]],dtype=float)
+        if(isinstance(self.drag,Ray)):
+            dir2 = np.array(self.drag.dir,dtype=float)
+            nor = np.array([-dir2[1],dir2[0]],dtype=float)
+        elif(isinstance(self.drag,Arc)):
+            nor = np.array([self.drag.mid[0]-point[0],self.drag.mid[1]-point[1]],dtype=float)
         nsq = np.dot(nor,nor)
         r = dir1 - 2 * np.dot(dir1,nor) / nsq * nor
         return r
@@ -220,8 +219,9 @@ async def main():
         for ray in rays:
             pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
             for drag_test in drags:
-                if(drag_test.is_colliding(ray)):
-                    ray.change_dir(drag_test.reflect(ray.dir))
+                res = drag_test.is_colliding(ray)
+                if(res[0]):
+                    ray.change_dir(drag_test.reflect(ray.dir,res[1]))
             ray.move(dt)
         pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
         for drag in drags:
