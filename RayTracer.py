@@ -6,12 +6,12 @@ ini_pos = (100,360)
 default_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
 motion_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
 class Ray:
-    def __init__(self,dir,size=10):
+    def __init__(self,dir,size=10.0,pos=ini_pos):
         self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]
         self.speed = 60
         self.size = size
-        self.start = [ini_pos[0],ini_pos[1]]
-        self.end = [ini_pos[0] + self.dir[0]*self.size,ini_pos[1] + self.dir[1]*self.size]
+        self.start = [pos[0],pos[1]]
+        self.end = [pos[0] + self.dir[0]*self.size,pos[1] + self.dir[1]*self.size]
         self.mid = [(self.end[0]+self.start[0])/2,(self.end[1]+self.start[1])/2]
 
     def move(self,dt):
@@ -194,7 +194,7 @@ class Ray_Shooter(Dragable):
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
-shooter = Ray_Shooter()
+shooters = [Ray_Shooter()]
 async def main():
     vel = pygame.math.Vector2(2,3)
     running = True
@@ -212,12 +212,13 @@ async def main():
                 pygame.mouse.set_cursor(motion_cursor)
                 inner_match = True
                 break
-        if inner_match:
-            pass
-        elif shooter.is_close(mouse_pos):
-            pygame.mouse.set_cursor(motion_cursor)
         else:
-            pygame.mouse.set_cursor(default_cursor)
+            for shooter in shooters:
+                if shooter.is_close(mouse_pos):
+                    pygame.mouse.set_cursor(motion_cursor)
+                    break
+            else:
+                pygame.mouse.set_cursor(default_cursor)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -236,9 +237,10 @@ async def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if(event.button in (4,5,6,7)):
                     continue
-                if shooter.is_close(event.pos):
-                    shooter.dragging = True
-                    continue
+                for shooter in shooters:
+                    if shooter.is_close(event.pos):
+                        shooter.dragging = True
+                        break
                 for drag_test in drags:
                     if drag_test.is_close(event.pos):
                         if event.button == 1:
@@ -249,10 +251,12 @@ async def main():
                             prev = [mouse_pos[0]-drag_test.drag.mid[0],mouse_pos[1]-drag_test.drag.mid[1]]
                             break
                 else:
-                    rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
+                    for shooter in shooters:
+                        rays.append(Ray((event.pos[0]-shooter.mid[0],event.pos[1]-shooter.mid[1]),pos=shooter.mid))
             elif event.type == pygame.MOUSEMOTION:
-                if(shooter.dragging):
-                    shooter.move_to(mouse_pos)
+                for shooter in shooters:
+                    if(shooter.dragging):
+                        shooter.move_to(mouse_pos)
                 for drag_test in drags:
                     if drag_test.dragging:
                         drag_test.move_to(mouse_pos)
@@ -264,12 +268,15 @@ async def main():
                 for drag_test in drags:
                     drag_test.dragging = False
                     drag_test.rotating = False
-                shooter.dragging = False
+                for shooter in shooters:
+                    shooter.dragging = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     drags.append(Dragable(Ray((1,0),100)))
                 elif event.key == pygame.K_g:
                     drags.append(Dragable(Arc(1.5,100)))
+                elif event.key == pygame.K_h:
+                    shooters.append(Ray_Shooter())
         dt = clock.tick(60)/1000.0
         for ray in rays:
             pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
@@ -279,7 +286,8 @@ async def main():
                     ray.change_dir(drag_test.reflect(ray.dir,res[1]))
             ray.move(dt)
         pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
-        shooter.draw()
+        for shooter in shooters:
+            shooter.draw()
         for drag in drags:
             drag.draw()
         pygame.display.flip()
