@@ -197,8 +197,12 @@ async def main():
                 for drag_test in drags:
                     if drag_test.is_close(mouse_pos):
                         if(isinstance(drag_test.drag,Arc)):
-                            drag_test.drag.start_angle = (drag_test.drag.start_angle+event.y/5)
-                            drag_test.drag.end_angle = (drag_test.drag.end_angle-event.y/5)
+                            keys = pygame.key.get_pressed()
+                            if(keys[pygame.K_r]):
+                                drag_test.drag.rad += event.y*3
+                            else:
+                                drag_test.drag.start_angle = (drag_test.drag.start_angle+event.y/5)
+                                drag_test.drag.end_angle = (drag_test.drag.end_angle-event.y/5)
                         elif(isinstance(drag_test.drag,Ray)):
                             drag_test.drag.change_size(event.y)
             elif event.type == pygame.MOUSEBUTTONDOWN:
