@@ -48,18 +48,24 @@ class Arc:
         pygame.draw.arc(screen,(0,50,255),(self.mid[0]-self.rad,self.mid[1]-self.rad,self.rad*2,self.rad*2),self.start_angle,self.end_angle)
 
     def is_colliding(self,ray):
-        for t in range(0,11):
-            t=t/10
+        n = 20
+        for t in range(0,n+1):
+            t=t/n
             point = ray.lerp(t)
             dis = math.sqrt((point[0]-self.mid[0])**2 + (point[1]-self.mid[1])**2)
-            if((dis-self.rad)<0.1):
-               ob = Dragable(Ray((1,0),10))
-               dir = [point[0]-self.mid[0],point[1]-self.mid[1]]
-               di = [1,0]
-               angle = (ob.angle_bet(dir,di))%(2*math.pi)
-               if(angle>self.start_angle and angle<self.end_angle):
+            ob = Dragable(Ray((1,0),10))
+            dir = [point[0]-self.mid[0],point[1]-self.mid[1]]
+            di = [1,0]
+            angle = (-ob.angle_bet(dir,di))%(2*math.pi)
+            print(self.rad)
+            if(abs(dis-self.rad)<0.5):
+               print("is close")
+               if(self.start_angle<self.end_angle):
+                   print("problem")
+               if(self.start_angle<self.end_angle and angle>self.start_angle and angle<self.end_angle):
                    return True
-               return False
+               elif(self.start_angle>self.end_angle and (angle>self.start_angle or angle<self.end_angle)):
+                   return True
         return False
 
 class Dragable:
@@ -145,8 +151,9 @@ class Dragable:
             self.drag.start = new_start
             self.rotate_dir(angle)
         elif(isinstance(self.drag,Arc)):
-            self.drag.start_angle -= angle
-            self.drag.end_angle -= angle
+            self.drag.start_angle = (self.drag.start_angle-angle)%(2*math.pi)
+            self.drag.end_angle = (self.drag.end_angle-angle)%(2*math.pi)
+            
 
     def rotate_dir(self,angle):
         x,y = self.drag.dir
