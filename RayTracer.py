@@ -170,9 +170,31 @@ class Dragable:
     def draw(self):
         self.drag.draw()
 
+class Ray_Shooter(Dragable):
+    def __init__(self):
+        self.rad = 15
+        self.mid = [ini_pos[0],ini_pos[1]]
+        self.dragging = False
+
+    def draw(self):
+        pygame.draw.circle(screen,(255,0,0),self.mid,self.rad)
+
+    def is_close(self,point):
+            dis = self.rad
+            dist = math.sqrt((point[0]-self.mid[0])**2 + (point[1]-self.mid[1])**2)
+            if (dist<dis):
+                return True
+            else:
+                return False
+
+    def move_to(self,point):
+        self.mid[0] = point[0]
+        self.mid[1] = point[1]
+
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
+shooter = Ray_Shooter()
 async def main():
     vel = pygame.math.Vector2(2,3)
     running = True
@@ -182,12 +204,18 @@ async def main():
     drags = [Dragable(Arc(1.5,100))]
     prev = 0
     while running:
+        inner_match = False
         mouse_pos = pygame.mouse.get_pos()
         screen.fill((0,255,0))
         for drag_test in drags:
             if drag_test.is_close(mouse_pos):
                 pygame.mouse.set_cursor(motion_cursor)
+                inner_match = True
                 break
+        if inner_match:
+            pass
+        elif shooter.is_close(mouse_pos):
+            pygame.mouse.set_cursor(motion_cursor)
         else:
             pygame.mouse.set_cursor(default_cursor)
         for event in pygame.event.get():
@@ -208,6 +236,9 @@ async def main():
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if(event.button in (4,5,6,7)):
                     continue
+                if shooter.is_close(event.pos):
+                    shooter.dragging = True
+                    continue
                 for drag_test in drags:
                     if drag_test.is_close(event.pos):
                         if event.button == 1:
@@ -220,6 +251,8 @@ async def main():
                 else:
                     rays.append(Ray((event.pos[0]-ini_pos[0],event.pos[1]-ini_pos[1])))
             elif event.type == pygame.MOUSEMOTION:
+                if(shooter.dragging):
+                    shooter.move_to(mouse_pos)
                 for drag_test in drags:
                     if drag_test.dragging:
                         drag_test.move_to(mouse_pos)
@@ -231,6 +264,7 @@ async def main():
                 for drag_test in drags:
                     drag_test.dragging = False
                     drag_test.rotating = False
+                shooter.dragging = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     drags.append(Dragable(Ray((1,0),100)))
@@ -245,6 +279,7 @@ async def main():
                     ray.change_dir(drag_test.reflect(ray.dir,res[1]))
             ray.move(dt)
         pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
+        shooter.draw()
         for drag in drags:
             drag.draw()
         pygame.display.flip()
