@@ -188,7 +188,15 @@ async def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.MOUSEWHEEL:
+                for drag_test in drags:
+                    if drag_test.is_close(mouse_pos):
+                        if(isinstance(drag_test.drag,Arc)):
+                            drag_test.drag.start_angle = (drag_test.drag.start_angle+event.y/5)
+                            drag_test.drag.end_angle = (drag_test.drag.end_angle-event.y/5)
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                if(event.button in (4,5,6,7)):
+                    continue
                 for drag_test in drags:
                     if drag_test.is_close(event.pos):
                         if event.button == 1:
