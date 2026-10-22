@@ -234,6 +234,8 @@ async def main():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     drags.append(Dragable(Ray((1,0),100)))
+                elif event.key == pygame.K_g:
+                    drags.append(Dragable(Arc(1.5,100)))
         dt = clock.tick(60)/1000.0
         for ray in rays:
             pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
