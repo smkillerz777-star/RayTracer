@@ -194,10 +194,14 @@ class Ray_Shooter(Dragable):
 class Material:
     def __init__(self,index):
         self.index = index
-        self.surface = Arc(0.0001,100)
+        self.surface = Arc(0.0001,50)
 
     def draw(self):
         self.surface.draw()
+        t_sur = pygame.Surface((100,100),pygame.SRCALPHA)
+        col = (255,255,255,128)
+        pygame.draw.circle(t_sur,col,(50,50),50)
+        screen.blit(t_sur,(self.surface.mid[0]-50,self.surface.mid[1]-50))
 
     def is_inside(self,ray:Ray):
         return self.is_point_inside(ray.start) or self.is_point_inside(ray.end)
