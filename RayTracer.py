@@ -299,6 +299,13 @@ async def main():
                     drags.append(Dragable(Arc(1.5,100)))
                 elif event.key == pygame.K_h:
                     shooters.append(Ray_Shooter())
+                elif event.key == pygame.K_DELETE:
+                    for drag in drags:
+                        if(drag.is_close(mouse_pos)):
+                            drags.remove(drag)
+                    for shooter in shooters:
+                        if(shooter.is_close(mouse_pos)):
+                            shooters.remove(shooter)
         dt = clock.tick(60)/1000.0
         for ray in rays:
             for mat in mats:
