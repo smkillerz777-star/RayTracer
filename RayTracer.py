@@ -200,7 +200,14 @@ class Material:
         self.surface.draw()
 
     def is_inside(self,ray:Ray):
-        return True
+        return self.is_point_inside(ray.start) or self.is_point_inside(ray.end)
+
+    def is_point_inside(self,point):
+        mid = self.surface.mid
+        dis = math.sqrt((mid[0]-point[0])**2+(mid[1]-point[1])**2)
+        if(dis<self.surface.rad):
+            return True
+        return False
 
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
@@ -214,19 +221,18 @@ async def main():
     rays = []
     drags = [Dragable(Arc(1.5,100))]
     prev = 0
-    mat = Material(3)#mats = [Material(3)]
+    mats = [Material(3)]
     while running:
         inner_match = False
         mouse_pos = pygame.mouse.get_pos()
         screen.fill((0,255,0))
-        mat.draw()
+        for mat in mats:
+            mat.draw()
         for drag_test in drags:
             if drag_test.is_close(mouse_pos):
                 pygame.mouse.set_cursor(motion_cursor)
                 inner_match = True
                 break
-        #for mat in mats:
-        #    mat.draw()
         else:
             for shooter in shooters:
                 if shooter.is_close(mouse_pos):
@@ -295,6 +301,8 @@ async def main():
                     shooters.append(Ray_Shooter())
         dt = clock.tick(60)/1000.0
         for ray in rays:
+            for mat in mats:
+                print(mat.is_inside(ray))
             pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
             for drag_test in drags:
                 res = drag_test.is_colliding(ray)
