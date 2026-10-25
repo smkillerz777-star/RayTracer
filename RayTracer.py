@@ -383,6 +383,9 @@ async def main():
                             mats.remove(mat)
         dt = clock.tick(60)/1000.0
         for ray in rays:
+            if(not screen.get_rect().collidepoint(ray.mid[0],ray.mid[1])):
+                rays.remove(ray)
+                continue
             pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
             for drag_test in drags:
                 res = drag_test.is_colliding(ray)
