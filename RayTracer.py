@@ -263,6 +263,22 @@ class Material:
         y = ray.start[1] + t*(ray.end[1]-ray.start[1])
         return [x,y]
 
+class Button:
+    def __init__(self,text,x,y,width,height):
+        font = pygame.font.SysFont("Arial", 24)
+        self.text = text
+        self.rect = pygame.Rect(x,y,width,height)
+        self.color = (233,22,100)
+        self.text_surf = font.render(text,True,(255,255,255))
+        self.text_rect = self.text_surf.get_rect(center=self.rect.center)
+
+    def draw(self):
+        pygame.draw.rect(screen,self.color,self.rect,border_radius=5)
+        screen.blit(self.text_surf,self.text_rect)
+
+    def is_close(self,pos):
+        return self.rect.collidepoint(pos)
+
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
@@ -277,6 +293,7 @@ async def main():
     shooters = [Ray_Shooter()]
     mats = [Material(1.33)]
     screen.fill((0,255,0))
+    button = Button("START",440,310,100,50)
     while running:
         mouse_pos = pygame.mouse.get_pos()
         screen.fill(screen_col)
@@ -301,7 +318,8 @@ async def main():
                             mat.change_index(event.y)
             elif(event.type == pygame.MOUSEBUTTONDOWN):
                 if(scene==0):
-                    scene = 1
+                    if(button.is_close(mouse_pos)):
+                        scene = 1
                 if(scene==1):
                     if(event.button in (4,5,6,7)):
                         continue
@@ -371,7 +389,9 @@ async def main():
                         for mat in mats:
                             if(mat.is_point_inside(mouse_pos)):
                                 mats.remove(mat)
-        if(scene==1):
+        if(scene==0):
+            button.draw()
+        elif(scene==1):
             for mat in mats:
                 mat.draw()
             for drag_test in drags:
