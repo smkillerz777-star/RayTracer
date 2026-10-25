@@ -229,8 +229,8 @@ class Material:
             meu = 1.0/meu
         k = 1 - (meu**2)*(1-cos1**2)
         if(k<0):
-            print("total internal refraction")
-            return ray.dir
+            ob = Dragable(Arc(2*math.pi,self.surface.rad))
+            return ob.reflect(inc,point)
         refrac = meu*inc+(meu*cos1-math.sqrt(k))*nor
         return refrac
 
@@ -263,7 +263,7 @@ async def main():
     rays = []
     drags = [Dragable(Arc(1.5,100))]
     prev = 0
-    mats = [Material(0.75)]
+    mats = [Material(0.0001)]
     while running:
         inner_match = False
         mouse_pos = pygame.mouse.get_pos()
