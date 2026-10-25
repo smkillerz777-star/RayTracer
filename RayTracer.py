@@ -217,17 +217,22 @@ class Material:
         point = self.get_collision_point(ray)
         if(point==None):
             return 
-        nor = np.array((point[0]-self.surface.mid[0],point[0]-self.surface.mid[0]))
+        nor = np.array((point[0]-self.surface.mid[0],point[1]-self.surface.mid[1]))
         nor = nor/np.linalg.norm(nor)
         inc = np.array((ray.dir[0],ray.dir[1]))
         inc = inc/np.linalg.norm(inc)
         cos1 = -1*np.dot(nor,inc)
-        k = 1 - (self.index**2)*(1-cos1**2)
+        meu = self.index
+        if(cos1<0):
+            nor = -nor
+            cos1 = -cos1
+            meu = 1.0/meu
+        k = 1 - (meu**2)*(1-cos1**2)
         if(k<0):
             print("total internal refraction")
-            return
-        refrac = self.index*inc+(self.index*cos1-math.sqrt(k))*nor
-        ray.dir = refrac
+            return ray.dir
+        refrac = meu*inc+(meu*cos1-math.sqrt(k))*nor
+        return refrac
 
     def get_collision_point(self,ray):
         n = 20
@@ -258,7 +263,7 @@ async def main():
     rays = []
     drags = [Dragable(Arc(1.5,100))]
     prev = 0
-    mats = [Material(3)]
+    mats = [Material(0.75)]
     while running:
         inner_match = False
         mouse_pos = pygame.mouse.get_pos()
@@ -352,7 +357,7 @@ async def main():
                     ray.change_dir(drag_test.reflect(ray.dir,res[1]))
             for mat in mats:
                 if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
-                    mat.refract(ray)
+                    ray.change_dir(mat.refract(ray))
             ray.move(dt)
         pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
         for shooter in shooters:
