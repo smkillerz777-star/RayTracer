@@ -197,6 +197,7 @@ class Material:
     def __init__(self,index):
         self.index = index
         self.surface = Arc(0.0001,50)
+        self.dragging = False
 
     def draw(self):
         t_sur = pygame.Surface((100,100),pygame.SRCALPHA)
@@ -209,6 +210,10 @@ class Material:
         self.index += change
         if(self.index<1):
             self.index=1
+
+    def move_to(self,point):
+        self.surface.mid[0] = point[0]
+        self.surface.mid[1] = point[1]
 
     def is_inside(self,ray:Ray):
         return self.is_point_inside(ray.start) or self.is_point_inside(ray.end)
@@ -272,7 +277,6 @@ async def main():
     prev = 0
     mats = [Material(1.33)]
     while running:
-        inner_match = False
         mouse_pos = pygame.mouse.get_pos()
         screen.fill((0,255,0))
         for mat in mats:
@@ -280,7 +284,6 @@ async def main():
         for drag_test in drags:
             if drag_test.is_close(mouse_pos):
                 pygame.mouse.set_cursor(motion_cursor)
-                inner_match = True
                 break
         else:
             for shooter in shooters:
@@ -288,7 +291,12 @@ async def main():
                     pygame.mouse.set_cursor(motion_cursor)
                     break
             else:
-                pygame.mouse.set_cursor(default_cursor)
+                for mat in mats:
+                    if(mat.is_point_inside(mouse_pos)):
+                        pygame.mouse.set_cursor(motion_cursor)
+                        break
+                else:
+                    pygame.mouse.set_cursor(default_cursor)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -325,12 +333,20 @@ async def main():
                             shooter.dragging = True
                             break
                     else:
-                        for shooter in shooters:
-                            rays.append(Ray((event.pos[0]-shooter.mid[0],event.pos[1]-shooter.mid[1]),pos=shooter.mid))
+                        for mat in mats:
+                            if(mat.is_point_inside(event.pos)):
+                                mat.dragging = True
+                                break
+                        else:
+                            for shooter in shooters:
+                                rays.append(Ray((event.pos[0]-shooter.mid[0],event.pos[1]-shooter.mid[1]),pos=shooter.mid))
             elif event.type == pygame.MOUSEMOTION:
                 for shooter in shooters:
                     if(shooter.dragging):
                         shooter.move_to(mouse_pos)
+                for mat in mats:
+                    if(mat.dragging):
+                        mat.move_to(mouse_pos)
                 for drag_test in drags:
                     if drag_test.dragging:
                         drag_test.move_to(mouse_pos)
@@ -344,6 +360,8 @@ async def main():
                     drag_test.rotating = False
                 for shooter in shooters:
                     shooter.dragging = False
+                for mat in mats:
+                    mat.dragging = False
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_f:
                     drags.append(Dragable(Ray((1,0),100)))
