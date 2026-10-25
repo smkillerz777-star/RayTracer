@@ -23,6 +23,8 @@ class Ray:
         self.mid[1] = self.mid[1] + (self.dir[1]*self.speed*dt)
 
     def change_dir(self,dir):
+        if(dir is None):
+            return
         self.dir = dir
         self.start = [self.end[0],self.end[1]]
         self.end = [self.start[0]+dir[0]*self.size,self.start[1]+dir[1]*self.size]
@@ -198,10 +200,15 @@ class Material:
 
     def draw(self):
         t_sur = pygame.Surface((100,100),pygame.SRCALPHA)
-        col = (255,255,255,128)
+        col = (0,0,0,255*(1-1/self.index))
         pygame.draw.circle(t_sur,col,(50,50),50)
         screen.blit(t_sur,(self.surface.mid[0]-50,self.surface.mid[1]-50))
         self.surface.draw()
+
+    def change_index(self,change):
+        self.index += change
+        if(self.index<1):
+            self.index=1
 
     def is_inside(self,ray:Ray):
         return self.is_point_inside(ray.start) or self.is_point_inside(ray.end)
@@ -217,7 +224,7 @@ class Material:
         point = self.get_collision_point(ray)
         if(point==None):
             return 
-        nor = np.array((point[0]-self.surface.mid[0],point[1]-self.surface.mid[1]))
+        nor = np.array((self.surface.mid[0]-point[0],self.surface.mid[1]-point[1]))
         nor = nor/np.linalg.norm(nor)
         inc = np.array((ray.dir[0],ray.dir[1]))
         inc = inc/np.linalg.norm(inc)
@@ -263,7 +270,7 @@ async def main():
     rays = []
     drags = [Dragable(Arc(1.5,100))]
     prev = 0
-    mats = [Material(0.0001)]
+    mats = [Material(1.33)]
     while running:
         inner_match = False
         mouse_pos = pygame.mouse.get_pos()
@@ -297,6 +304,9 @@ async def main():
                                 drag_test.drag.end_angle = (drag_test.drag.end_angle-event.y/5)
                         elif(isinstance(drag_test.drag,Ray)):
                             drag_test.drag.change_size(event.y)
+                for mat in mats:
+                    if(mat.is_point_inside(mouse_pos)):
+                        mat.change_index(event.y)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if(event.button in (4,5,6,7)):
                     continue
