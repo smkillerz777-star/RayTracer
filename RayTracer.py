@@ -369,6 +369,8 @@ async def main():
                     drags.append(Dragable(Arc(1.5,100)))
                 elif event.key == pygame.K_h:
                     shooters.append(Ray_Shooter())
+                elif event.key == pygame.K_j:
+                    mats.append(Material(1.33))
                 elif event.key == pygame.K_DELETE:
                     for drag in drags:
                         if(drag.is_close(mouse_pos)):
@@ -376,6 +378,9 @@ async def main():
                     for shooter in shooters:
                         if(shooter.is_close(mouse_pos)):
                             shooters.remove(shooter)
+                    for mat in mats:
+                        if(mat.is_point_inside(mouse_pos)):
+                            mats.remove(mat)
         dt = clock.tick(60)/1000.0
         for ray in rays:
             pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
@@ -387,7 +392,6 @@ async def main():
                 if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
                     ray.change_dir(mat.refract(ray))
             ray.move(dt)
-        pygame.draw.line(screen,(0,0,0),(0,360),(1080,360))
         for shooter in shooters:
             shooter.draw()
         for drag in drags:
