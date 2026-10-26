@@ -117,7 +117,7 @@ async def main():
                         for mat in mats:
                             if(mat.is_point_inside(mouse_pos)):
                                 mats.remove(mat)
-                player.move(event)
+            player.move(event)
         if(scene==0):
             button.draw()
             text.draw()

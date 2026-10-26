@@ -299,16 +299,23 @@ class Player:
         self.color = col
 
     def move(self,event):
-        if(not event.type == pygame.KEYDOWN):
+        move = [0,0]
+        keys = pygame.key.get_pressed()
+        if(keys[pygame.K_w]):
+            move[1] = -self.step
+        elif(keys[pygame.K_a]):
+            move[0] = -self.step
+        elif(keys[pygame.K_s]):
+            move[1] = self.step
+        elif(keys[pygame.K_d]):
+            move[0] = self.step
+        mag = math.sqrt(move[0]**2+move[1]**2)
+        if(mag==0):
             return
-        elif(event.key == pygame.K_w):
-            self.pos[1] -= self.step
-        elif(event.key == pygame.K_a):
-            self.pos[0] -= self.step
-        elif(event.key == pygame.K_s):
-            self.pos[1] += self.step
-        elif(event.key == pygame.K_d):
-            self.pos[0] += self.step
+        move[0] = move[0]/mag*self.step
+        move[1] = move[1]/mag*self.step
+        self.pos[0] += move[0]
+        self.pos[1] += move[1]
 
     def draw(self):
         pygame.draw.circle(screen,self.color,self.pos,50)
