@@ -298,17 +298,17 @@ class Player:
         self.step = 4
         self.color = col
 
-    def move(self,event):
+    def move(self):
         move = [0,0]
         keys = pygame.key.get_pressed()
         if(keys[pygame.K_w]):
-            move[1] = -self.step
-        elif(keys[pygame.K_a]):
-            move[0] = -self.step
-        elif(keys[pygame.K_s]):
-            move[1] = self.step
-        elif(keys[pygame.K_d]):
-            move[0] = self.step
+            move[1] = -1
+        if(keys[pygame.K_a]):
+            move[0] = -1
+        if(keys[pygame.K_s]):
+            move[1] = 1
+        if(keys[pygame.K_d]):
+            move[0] = 1
         mag = math.sqrt(move[0]**2+move[1]**2)
         if(mag==0):
             return
