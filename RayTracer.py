@@ -12,7 +12,7 @@ async def main():
     running = True
     dt=0.0
     prev = 0
-    scene = 0
+    scene = 2
     screen_col = (0,255,0)
     rays = []
     drags = []
@@ -20,8 +20,10 @@ async def main():
     mats = []
     player = Classes.Player([230,240])
     screen.fill((0,255,0))
-    button = Classes.Button("START",440,510,100,50)
-    text = Classes.Label("WELCOME TO RAY TRACER",50,50,1000,400)
+    start_button = Classes.Button("START",440,510,100,50)
+    restart_button = Classes.Button("PLAY AGAIN",440,510,150,80)
+    welcome_text = Classes.Label("WELCOME TO RAY TRACER",50,50,1000,400)
+    game_over_text = Classes.Label("GAME OVER",50,50,800,400)
     while running:
         mouse_pos = pygame.mouse.get_pos()
         screen.fill(screen_col)
@@ -46,9 +48,9 @@ async def main():
                             mat.change_index(event.y)
             elif(event.type == pygame.MOUSEBUTTONDOWN):
                 if(scene==0):
-                    if(button.is_close(mouse_pos)):
+                    if(start_button.is_close(mouse_pos)):
                         scene = 1
-                if(scene==1):
+                elif(scene==1):
                     if(event.button in (4,5,6,7)):
                         continue
                     for drag_test in drags:
@@ -73,6 +75,9 @@ async def main():
                             else:
                                 for shooter in shooters:
                                     rays.append(Classes.Ray((event.pos[0]-shooter.mid[0],event.pos[1]-shooter.mid[1]),pos=shooter.mid))
+                elif(scene==2):
+                     if(restart_button.is_close(mouse_pos)):
+                         scene=1
             elif event.type == pygame.MOUSEMOTION:
                 if(scene==1):
                     for shooter in shooters:
@@ -118,8 +123,8 @@ async def main():
                             if(mat.is_point_inside(mouse_pos)):
                                 mats.remove(mat)
         if(scene==0):
-            button.draw()
-            text.draw()
+            start_button.draw()
+            welcome_text.draw()
 
         elif(scene==1):
             player.move()
@@ -160,6 +165,9 @@ async def main():
                 shooter.draw()
             for drag in drags:
                 drag.draw()
+        elif scene==2:
+            restart_button.draw()
+            game_over_text.draw()
         pygame.display.flip()
 asyncio.run(main())
 pygame.quit()
