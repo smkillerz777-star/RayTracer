@@ -44,11 +44,15 @@ class Ray:
         self.size += ds*rate
 
 class Arc:
-    def __init__(self,angle,rad):
+    def __init__(self,angle,rad,pos=ini_pos,start=None):
         self.rad = rad
-        self.start_angle = (angle/2) % (2 * math.pi)
-        self.end_angle = (-angle/2) % (2 * math.pi)
-        self.mid = [ini_pos[0],ini_pos[1]]
+        if(start is None):
+            self.start_angle = (angle/2) % (2 * math.pi)
+            self.end_angle = (-angle/2) % (2 * math.pi)
+        else:
+            self.start_angle = start % (2*math.pi)
+            self.end_angle = (start+angle) % (2*math.pi)
+        self.mid = [pos[0],pos[1]]
         self.size = rad
 
     def draw(self):
@@ -290,10 +294,15 @@ async def main():
     screen_col = (0,255,0)
     rays = []
     drags = [Dragable(Arc(1.5,100))]
+    ini_drags = [
+        Dragable(Ray((1,1),pos=(90,140),size=20)),
+        Dragable(Ray((1,-1),pos=(150,155),size=20)),
+        Dragable(Arc(math.pi,20,pos=(160,60),start=0))
+        ]
     shooters = [Ray_Shooter()]
     mats = [Material(1.33)]
     screen.fill((0,255,0))
-    button = Button("START",440,310,100,50)
+    button = Button("START",440,510,100,50)
     while running:
         mouse_pos = pygame.mouse.get_pos()
         screen.fill(screen_col)
@@ -391,6 +400,18 @@ async def main():
                                 mats.remove(mat)
         if(scene==0):
             button.draw()
+            dt = clock.tick(60)/1000.0
+            rays.append(Ray((0,1),pos=(100,50)))
+            for drag in ini_drags:
+                drag.draw()
+            for ray in rays:
+                for drag in ini_drags:
+                    res = drag.is_colliding(ray)
+                    if(res[0]):
+                        ray.change_dir(drag.reflect(ray.dir,res[1]))
+                ray.draw()
+                ray.move(dt)
+
         elif(scene==1):
             for mat in mats:
                 mat.draw()
