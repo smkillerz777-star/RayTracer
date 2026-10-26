@@ -293,9 +293,10 @@ class Label:
         screen.blit(self.text_surf,self.text_rect)
 
 class Player:
-    def __init__(self,pos):
+    def __init__(self,pos,col=(23,50,100)):
         self.pos = pos
         self.step = 4
+        self.color = col
 
     def move(self,event):
         if(not event.type == pygame.KEYDOWN):
@@ -308,3 +309,6 @@ class Player:
             self.pos[1] += self.step
         elif(event.key == pygame.K_d):
             self.pos[0] += self.step
+
+    def draw(self):
+        pygame.draw.circle(screen,self.color,self.pos,50)

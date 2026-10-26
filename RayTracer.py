@@ -15,9 +15,10 @@ async def main():
     scene = 0
     screen_col = (0,255,0)
     rays = []
-    drags = [Classes.Dragable(Classes.Arc(1.5,100))]
-    shooters = [Classes.Ray_Shooter()]
-    mats = [Classes.Material(1.33)]
+    drags = []
+    shooters = []
+    mats = []
+    player = Classes.Player([230,240])
     screen.fill((0,255,0))
     button = Classes.Button("START",440,510,100,50)
     text = Classes.Label("WELCOME TO RAY TRACER",50,50,1000,400)
@@ -116,6 +117,7 @@ async def main():
                         for mat in mats:
                             if(mat.is_point_inside(mouse_pos)):
                                 mats.remove(mat)
+                player.move(event)
         if(scene==0):
             button.draw()
             text.draw()
@@ -153,6 +155,7 @@ async def main():
                     if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
                         ray.change_dir(mat.refract(ray))
                 ray.move(dt)
+            player.draw()
             for shooter in shooters:
                 shooter.draw()
             for drag in drags:
