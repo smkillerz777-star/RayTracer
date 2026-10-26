@@ -283,6 +283,17 @@ class Button:
     def is_close(self,pos):
         return self.rect.collidepoint(pos)
 
+class Label:
+    def __init__(self,text,x,y,width,height,color=(255,255,255)):
+        self.text = text
+        self.rect = pygame.Rect(x,y,width,height)
+        font = pygame.font.SysFont("Arial", int(height/5))
+        self.text_surf = font.render(text,True,color)
+        self.text_rect = self.text_surf.get_rect(center=self.rect.center)
+
+    def draw(self):
+        screen.blit(self.text_surf,self.text_rect)
+
 pygame.init()
 screen = pygame.display.set_mode((1080,720))
 clock = pygame.time.Clock()
@@ -294,15 +305,11 @@ async def main():
     screen_col = (0,255,0)
     rays = []
     drags = [Dragable(Arc(1.5,100))]
-    ini_drags = [
-        Dragable(Ray((1,1),pos=(90,140),size=20)),
-        Dragable(Ray((1,-1),pos=(150,155),size=20)),
-        Dragable(Arc(math.pi,20,pos=(160,60),start=0))
-        ]
     shooters = [Ray_Shooter()]
     mats = [Material(1.33)]
     screen.fill((0,255,0))
     button = Button("START",440,510,100,50)
+    text = Label("WELCOME TO RAY TRACER",50,50,1000,400)
     while running:
         mouse_pos = pygame.mouse.get_pos()
         screen.fill(screen_col)
@@ -400,17 +407,7 @@ async def main():
                                 mats.remove(mat)
         if(scene==0):
             button.draw()
-            dt = clock.tick(60)/1000.0
-            rays.append(Ray((0,1),pos=(100,50)))
-            for drag in ini_drags:
-                drag.draw()
-            for ray in rays:
-                for drag in ini_drags:
-                    res = drag.is_colliding(ray)
-                    if(res[0]):
-                        ray.change_dir(drag.reflect(ray.dir,res[1]))
-                ray.draw()
-                ray.move(dt)
+            text.draw()
 
         elif(scene==1):
             for mat in mats:
