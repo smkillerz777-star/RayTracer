@@ -32,6 +32,7 @@ class Ray:
         self.end = [self.start[0]+dir[0]*self.size,self.start[1]+dir[1]*self.size]
 
     def draw(self):
+        print("hi")
         glColor4f(*self.color)
         glLineWidth(2)
         glBegin(GL_LINES)

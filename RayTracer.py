@@ -23,8 +23,8 @@ def main():
     dt=0.0
     prev = 0
     scene = 1
-    rays = []
-    drags = []
+    rays = [Ray((1,0))]
+    drags = []#[Dragable(Ray((1,0)))]
     shooters = []
     mats = []
     player = Classes.Player([230,240])
@@ -34,7 +34,6 @@ def main():
     welcome_text = Classes.Label("WELCOME TO RAY TRACER",50,50,1000,400)
     game_over_text = Classes.Label("GAME OVER",50,50,800,400)
     while running:
-        print(len(shooters))
         mouse_pos = pygame.mouse.get_pos()
         glClear(GL_COLOR_BUFFER_BIT)
         for event in pygame.event.get():
@@ -159,9 +158,10 @@ def main():
             dt = clock.tick(60)/1000.0
             for ray in rays:
                 if(not screen.get_rect().collidepoint(ray.mid[0],ray.mid[1])):
+                    print("hifs")
                     rays.remove(ray)
                     continue
-                pygame.draw.line(screen,(255,0,0),ray.start,ray.end,3)
+                ray.draw()
                 for drag_test in drags:
                     res = drag_test.is_colliding(ray)
                     if(res[0]):
