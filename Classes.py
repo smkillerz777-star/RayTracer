@@ -371,7 +371,7 @@ class Player:
         step = 2*math.pi/segments
         glBegin(GL_QUADS)
         #torso
-        glColor3f(0.82, 0.25, 0.28)
+        glColor3f(0.48, 0.04, 0.09)
         glVertex2f(self.pos[0]-torso_width,self.pos[1]-torso_height)
         glVertex2f(self.pos[0]+torso_width,self.pos[1]-torso_height)
         glVertex2f(self.pos[0]+torso_width,self.pos[1]+torso_height)
@@ -389,7 +389,7 @@ class Player:
         glEnd()
         glBegin(GL_QUADS)
         #shoulders
-        glColor3f(0.82, 0.25, 0.28)
+        glColor3f(0.48, 0.04, 0.09)
 
         glVertex2f(self.pos[0]+torso_width,self.pos[1]-torso_height)
         glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]-torso_height+2)
@@ -413,7 +413,7 @@ class Player:
         glVertex2f(self.pos[0]+torso_width+1,self.pos[1]+torso_height)
         glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]+torso_height)
         #leg
-        glColor3f(0.18, 0.28, 0.44)
+        glColor3f(0.11, 0.12, 0.15)
 
         glVertex2f(self.pos[0]+torso_width,self.pos[1]+torso_height)
         glVertex2f(self.pos[0],self.pos[1]+torso_height)
