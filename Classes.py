@@ -1,17 +1,20 @@
 import math
 import pygame
 from OpenGL.GL import *
+from OpenGL.GLU import *
+from pygame.locals import *
 import numpy as np
 ini_pos = (100,360)
 screen = None
 class Ray:
-    def __init__(self,dir,size=10.0,pos=ini_pos):
+    def __init__(self,dir,size=10.0,pos=ini_pos,color=(0.8,0.2,0.4,1)):
         self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]
         self.speed = 60
         self.size = size
         self.start = [pos[0],pos[1]]
         self.end = [pos[0] + self.dir[0]*self.size,pos[1] + self.dir[1]*self.size]
         self.mid = [(self.end[0]+self.start[0])/2,(self.end[1]+self.start[1])/2]
+        self.color = color
 
     def move(self,dt):
         self.start[0] = self.start[0] + (self.dir[0]*self.speed*dt)
@@ -29,7 +32,12 @@ class Ray:
         self.end = [self.start[0]+dir[0]*self.size,self.start[1]+dir[1]*self.size]
 
     def draw(self):
-        pygame.draw.line(screen,(255,0,0),self.start,self.end,3)
+        glColor4f(*self.color)
+        glLineWidth(2)
+        glBegin(GL_LINES)
+        glVertex2f(self.start[0],self.start[1])
+        glVertex2f(self.end[0],self.end[0])
+        glEnd()
 
     def lerp(self,t):
         x = self.start[0] + t*(self.end[0]-self.start[0])

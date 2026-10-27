@@ -4,6 +4,7 @@ import asyncio
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
+from Classes import *
 default_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
 motion_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
 
@@ -12,25 +13,24 @@ pygame.init()
 screen = pygame.display.set_mode((1080,720),DOUBLEBUF | OPENGL)
 Classes.screen = screen
 clock = pygame.time.Clock()
-async def main():
+def main():
     running = True
     dt=0.0
     prev = 0
-    scene = 2
-    screen_col = (0,255,0)
+    scene = 1
     rays = []
     drags = []
     shooters = []
     mats = []
     player = Classes.Player([230,240])
-    screen.fill((0,255,0))
+    glClearColor(0.1,0.5,0.4,1.0)
     start_button = Classes.Button("START",440,510,100,50)
     restart_button = Classes.Button("PLAY AGAIN",440,510,150,80)
     welcome_text = Classes.Label("WELCOME TO RAY TRACER",50,50,1000,400)
     game_over_text = Classes.Label("GAME OVER",50,50,800,400)
     while running:
         mouse_pos = pygame.mouse.get_pos()
-        screen.fill(screen_col)
+        glClear(GL_COLOR_BUFFER_BIT)
         for event in pygame.event.get():
             if(event.type == pygame.QUIT):
                 running = False
@@ -173,5 +173,5 @@ async def main():
             restart_button.draw()
             game_over_text.draw()
         pygame.display.flip()
-asyncio.run(main())
+main()
 pygame.quit()
