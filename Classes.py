@@ -357,5 +357,80 @@ class Player:
         self.pos[0] += move[0]
         self.pos[1] += move[1]
 
-    def draw(self):
-        pygame.draw.circle(screen,self.color,self.pos,50)
+    def draw(self,segments=60):
+        torso_width = 7
+        torso_height = 12
+        face_rad = 5
+        head_cen = [self.pos[0],self.pos[1]-torso_height-face_rad]
+        sh_angle = 30/180*math.pi
+        sh_width = 3
+        leg_width = 6
+        leg_height = 15
+        step = 2*math.pi/segments
+        glBegin(GL_QUADS)
+        glColor3f(0.82, 0.25, 0.28)
+        glVertex2f(self.pos[0]-torso_width,self.pos[1]-torso_height)
+        glVertex2f(self.pos[0]+torso_width,self.pos[1]-torso_height)
+        glVertex2f(self.pos[0]+torso_width,self.pos[1]+torso_height)
+        glVertex2f(self.pos[0]-torso_width,self.pos[1]+torso_height)
+        glEnd()
+        glBegin(GL_TRIANGLE_FAN)
+        glColor3f(0.95, 0.76, 0.64)
+        glVertex2f(head_cen[0],head_cen[1])
+        for i in range(segments+1):
+            angle = i*step
+            x = head_cen[0]+math.cos(angle)*face_rad
+            y = head_cen[1]+math.sin(angle)*face_rad
+            glVertex2f(x,y)
+        glEnd()
+        glBegin(GL_QUADS)
+        glColor3f(0.82, 0.25, 0.28)
+
+        glVertex2f(self.pos[0]+torso_width,self.pos[1]-torso_height)
+        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]-torso_height+2)
+        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos[0]+torso_width+1,self.pos[1]+torso_height-2)
+
+        glVertex2f(self.pos[0]-torso_width,self.pos[1]-torso_height)
+        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]-torso_height+2)
+        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos[0]-torso_width-1,self.pos[1]+torso_height-2)
+
+        glColor3f(0.95, 0.76, 0.64)
+
+        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos[0]-torso_width-1,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos[0]-torso_width-1,self.pos[1]+torso_height)
+        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]+torso_height)
+
+        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos[0]+torso_width+1,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos[0]+torso_width+1,self.pos[1]+torso_height)
+        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]+torso_height)
+
+        glColor3f(0.18, 0.28, 0.44)
+
+        glVertex2f(self.pos[0]+torso_width,self.pos[1]+torso_height)
+        glVertex2f(self.pos[0],self.pos[1]+torso_height)
+        glVertex2f(self.pos[0]+1,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos[0]+1+leg_width,self.pos[1]+torso_height+leg_height)
+
+        glVertex2f(self.pos[0]-torso_width,self.pos[1]+torso_height)
+        glVertex2f(self.pos[0],self.pos[1]+torso_height)
+        glVertex2f(self.pos[0]-1,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos[0]-1-leg_width,self.pos[1]+torso_height+leg_height)
+
+        glColor3f(0.24, 0.16, 0.12)
+
+        glVertex2f(self.pos[0]+1,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos[0]+1+leg_width,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos[0]+1+leg_width,self.pos[1]+torso_height+leg_height+4)
+        glVertex2f(self.pos[0]+1,self.pos[1]+torso_height+leg_height+4)
+
+        glVertex2f(self.pos[0]-1,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos[0]-1-leg_width,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos[0]-1-leg_width,self.pos[1]+torso_height+leg_height+4)
+        glVertex2f(self.pos[0]-1,self.pos[1]+torso_height+leg_height+4)
+
+        glEnd()
+        
