@@ -1,8 +1,9 @@
 import math
 import pygame
+from OpenGL.GL import *
 import numpy as np
 ini_pos = (100,360)
-screen = pygame.display.set_mode((1080,720))
+screen = None
 class Ray:
     def __init__(self,dir,size=10.0,pos=ini_pos):
         self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]

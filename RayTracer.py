@@ -1,12 +1,16 @@
 import pygame
 import Classes
 import asyncio
+from pygame.locals import *
+from OpenGL.GL import *
+from OpenGL.GLU import *
 default_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
 motion_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
 
 
 pygame.init()
-screen = pygame.display.set_mode((1080,720))
+screen = pygame.display.set_mode((1080,720),DOUBLEBUF | OPENGL)
+Classes.screen = screen
 clock = pygame.time.Clock()
 async def main():
     running = True
