@@ -65,10 +65,12 @@ class Arc:
 
     def draw(self,segments=60):
         step = (self.end_angle-self.start_angle)/segments
+        if(step<0):
+            step += (2*math.pi)/segments
         glColor3f(*self.color)
         glBegin(GL_LINE_STRIP)
         for i in range(segments+1):
-            angle = self.start_angle + i*step
+            angle = (self.start_angle + i*step)%(math.pi*2)
             x= self.mid[0] + self.rad*math.cos(angle)
             y= self.mid[1] + self.rad*math.sin(angle)
             glVertex2f(x,y)
@@ -177,6 +179,7 @@ class Dragable:
             self.drag.start = new_start
             self.rotate_dir(angle)
         elif(isinstance(self.drag,Arc)):
+            angle = -angle
             self.drag.start_angle = (self.drag.start_angle-angle)%(2*math.pi)
             self.drag.end_angle = (self.drag.end_angle-angle)%(2*math.pi)
             

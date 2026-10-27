@@ -1,6 +1,5 @@
 import pygame
 import Classes
-import asyncio
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
@@ -14,7 +13,7 @@ screen = pygame.display.set_mode((1080,720),DOUBLEBUF | OPENGL)
 glMatrixMode(GL_PROJECTION)
 glLoadIdentity()
 gluOrtho2D(0,1080,720,0)
-glMatrixMode(GL_MODELVIEW)jkkj
+glMatrixMode(GL_MODELVIEW)
 glLoadIdentity()
 glEnable(GL_BLEND)
 glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
