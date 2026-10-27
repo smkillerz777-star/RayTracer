@@ -14,8 +14,10 @@ screen = pygame.display.set_mode((1080,720),DOUBLEBUF | OPENGL)
 glMatrixMode(GL_PROJECTION)
 glLoadIdentity()
 gluOrtho2D(0,1080,720,0)
-glMatrixMode(GL_MODELVIEW)
+glMatrixMode(GL_MODELVIEW)jkkj
 glLoadIdentity()
+glEnable(GL_BLEND)
+glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 Classes.screen = screen
 clock = pygame.time.Clock()
 def main():

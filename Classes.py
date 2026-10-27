@@ -225,16 +225,24 @@ class Ray_Shooter(Dragable):
         self.mid[1] = point[1]
 
 class Material:
-    def __init__(self,index):
+    def __init__(self,index,color=(0.8,0.2,0.4)):
         self.index = index
         self.surface = Arc(0.0001,50)
         self.dragging = False
+        self.color = color
 
-    def draw(self):
-        t_sur = pygame.Surface((100,100),pygame.SRCALPHA)
-        col = (0,0,0,255*(1-1/self.index))
-        pygame.draw.circle(t_sur,col,(50,50),50)
-        screen.blit(t_sur,(self.surface.mid[0]-50,self.surface.mid[1]-50))
+    def draw(self,segments=60):
+        col = (self.color[0],self.color[1],self.color[2],(1-1/self.index))
+        step = 2*math.pi/segments
+        glColor4f(*col)
+        glBegin(GL_TRIANGLE_FAN)
+        glVertex2f(self.surface.mid[0],self.surface.mid[1])
+        for i in range(segments+1):
+            angle = i*step
+            x = self.surface.mid[0] + self.surface.rad*math.cos(angle)
+            y = self.surface.mid[1] + self.surface.rad*math.sin(angle)
+            glVertex2f(x,y)
+        glEnd()
         self.surface.draw()
 
     def change_index(self,change):
