@@ -11,6 +11,11 @@ motion_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
 
 pygame.init()
 screen = pygame.display.set_mode((1080,720),DOUBLEBUF | OPENGL)
+glMatrixMode(GL_PROJECTION)
+glLoadIdentity()
+gluOrtho2D(0,1080,720,0)
+glMatrixMode(GL_MODELVIEW)
+glLoadIdentity()
 Classes.screen = screen
 clock = pygame.time.Clock()
 def main():
@@ -29,6 +34,7 @@ def main():
     welcome_text = Classes.Label("WELCOME TO RAY TRACER",50,50,1000,400)
     game_over_text = Classes.Label("GAME OVER",50,50,800,400)
     while running:
+        print(len(shooters))
         mouse_pos = pygame.mouse.get_pos()
         glClear(GL_COLOR_BUFFER_BIT)
         for event in pygame.event.get():

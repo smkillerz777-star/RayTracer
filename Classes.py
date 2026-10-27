@@ -36,7 +36,7 @@ class Ray:
         glLineWidth(2)
         glBegin(GL_LINES)
         glVertex2f(self.start[0],self.start[1])
-        glVertex2f(self.end[0],self.end[0])
+        glVertex2f(self.end[0],self.end[1])
         glEnd()
 
     def lerp(self,t):
