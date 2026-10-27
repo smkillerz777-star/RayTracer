@@ -32,7 +32,6 @@ class Ray:
         self.end = [self.start[0]+dir[0]*self.size,self.start[1]+dir[1]*self.size]
 
     def draw(self):
-        print("hi")
         glColor4f(*self.color)
         glLineWidth(2)
         glBegin(GL_LINES)
@@ -52,7 +51,7 @@ class Ray:
         self.size += ds*rate
 
 class Arc:
-    def __init__(self,angle,rad,pos=ini_pos,start=None):
+    def __init__(self,angle,rad,pos=ini_pos,start=None,color=(0.7,0.5,0.1)):
         self.rad = rad
         if(start is None):
             self.start_angle = (angle/2) % (2 * math.pi)
@@ -62,9 +61,18 @@ class Arc:
             self.end_angle = (start+angle) % (2*math.pi)
         self.mid = [pos[0],pos[1]]
         self.size = rad
+        self.color = color
 
-    def draw(self):
-        pygame.draw.arc(screen,(0,50,255),(self.mid[0]-self.rad,self.mid[1]-self.rad,self.rad*2,self.rad*2),self.start_angle,self.end_angle)
+    def draw(self,segments=60):
+        step = (self.end_angle-self.start_angle)/segments
+        glColor3f(*self.color)
+        glBegin(GL_LINE_STRIP)
+        for i in range(segments+1):
+            angle = self.start_angle + i*step
+            x= self.mid[0] + self.rad*math.cos(angle)
+            y= self.mid[1] + self.rad*math.sin(angle)
+            glVertex2f(x,y)
+        glEnd()
 
     def is_colliding(self,ray):
         n = 20

@@ -23,8 +23,8 @@ def main():
     dt=0.0
     prev = 0
     scene = 1
-    rays = [Ray((1,0))]
-    drags = []#[Dragable(Ray((1,0)))]
+    rays = []
+    drags = []
     shooters = []
     mats = []
     player = Classes.Player([230,240])
@@ -158,7 +158,6 @@ def main():
             dt = clock.tick(60)/1000.0
             for ray in rays:
                 if(not screen.get_rect().collidepoint(ray.mid[0],ray.mid[1])):
-                    print("hifs")
                     rays.remove(ray)
                     continue
                 ray.draw()
