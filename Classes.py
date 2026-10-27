@@ -193,13 +193,24 @@ class Dragable:
         self.drag.draw()
 
 class Ray_Shooter(Dragable):
-    def __init__(self):
+    def __init__(self,color=(0.9,0.1,0.3)):
         self.rad = 15
         self.mid = [ini_pos[0],ini_pos[1]]
         self.dragging = False
+        self.color = color
 
-    def draw(self):
-        pygame.draw.circle(screen,(255,0,0),self.mid,self.rad)
+    def draw(self,segments=60):
+        step = 2*math.pi/segments
+        glColor3f(*self.color)
+        glBegin(GL_TRIANGLE_FAN)
+        glVertex2f(self.mid[0],self.mid[1])
+        for i in range(segments+1):
+            angle = i*step
+            x = self.mid[0] + self.rad*math.cos(angle)
+            y = self.mid[1] + self.rad*math.sin(angle)
+            glVertex2f(x,y)
+        glEnd()
+        
 
     def is_close(self,point):
             dis = self.rad
