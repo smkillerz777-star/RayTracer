@@ -58,6 +58,8 @@ def main():
                         if(mat.is_point_inside(mouse_pos)):
                             mat.change_index(event.y)
             elif(event.type == pygame.MOUSEBUTTONDOWN):
+                event_pos = event.pos
+                event_pos = Point(event_pos[0],event_pos[1])
                 if(scene==0):
                     if(start_button.is_close(mouse_pos)):
                         scene = 1
@@ -65,27 +67,27 @@ def main():
                     if(event.button in (4,5,6,7)):
                         continue
                     for drag_test in drags:
-                        if drag_test.is_close(event.pos):
+                        if drag_test.is_close(event_pos):
                             if event.button == 1:
                                 drag_test.dragging = True
                                 break
                             elif event.button == 3:
                                 drag_test.rotating = True
-                                prev = [mouse_pos[0]-drag_test.drag.mid[0],mouse_pos[1]-drag_test.drag.mid[1]]
+                                prev = [mouse_pos.x-drag_test.drag.mid.x,mouse_pos.y-drag_test.drag.mid.y]
                                 break
                     else:
                         for shooter in shooters:
-                            if shooter.is_close(event.pos):
+                            if shooter.is_close(event_pos):
                                 shooter.dragging = True
                                 break
                         else:
                             for mat in mats:
-                                if(mat.is_point_inside(event.pos)):
+                                if(mat.is_point_inside(event_pos)):
                                     mat.dragging = True
                                     break
                             else:
                                 for shooter in shooters:
-                                    rays.append(Classes.Ray((event.pos[0]-shooter.mid[0],event.pos[1]-shooter.mid[1]),pos=shooter.mid))
+                                    rays.append(Classes.Ray((event_pos.x-shooter.mid.x,event_pos.y-shooter.mid.y),pos=shooter.mid))
                 elif(scene==2):
                      if(restart_button.is_close(mouse_pos)):
                          scene=1
@@ -116,7 +118,7 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if(scene==1):
                     if event.key == pygame.K_f:
-                        drags.append(Classes.Dragable(Classes.Ray((1,0),100)))
+                        drags.append(Classes.Dragable(Classes.Ray(Point(1,0),100)))
                     elif event.key == pygame.K_g:
                         drags.append(Classes.Dragable(Classes.Arc(1.5,100)))
                     elif event.key == pygame.K_h:

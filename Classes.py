@@ -4,7 +4,6 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 import numpy as np
-ini_pos = (100,360)
 screen = None
 class Point:
     def __init__(self,x,y):
@@ -43,13 +42,17 @@ class Point:
 
     def norm(self):
         return self.mul(1/self.mag)
+
+    def toarray(self):
+        return [self.x,self.y]
+ini_pos = Point(100,360)
     
 class Ray:
     def __init__(self,dir,size=10.0,pos=ini_pos,color=(0.8,0.2,0.4,1)):
-        self.dir = Point(dir[0],dir[1]).norm()
+        self.dir = Point(dir.x,dir.y).norm()
         self.speed = 60
         self.size = size
-        self.start = Point(pos[0],pos[1])
+        self.start = Point(pos.x,pos.y)
         self.end = self.start.add(self.dir.mul(self.size))
         self.mid = self.start.add(self.end).mul(1/2)
         self.color = color
@@ -91,7 +94,7 @@ class Arc:
         else:
             self.start_angle = start % (2*math.pi)
             self.end_angle = (start+angle) % (2*math.pi)
-        self.mid = [pos[0],pos[1]]
+        self.mid = Point(pos[0],pos[1])
         self.size = rad
         self.color = color
 
@@ -103,8 +106,8 @@ class Arc:
         glBegin(GL_LINE_STRIP)
         for i in range(segments+1):
             angle = (self.start_angle + i*step)%(math.pi*2)
-            x= self.mid[0] + self.rad*math.cos(angle)
-            y= self.mid[1] + self.rad*math.sin(angle)
+            x= self.mid.x + self.rad*math.cos(angle)
+            y= self.mid.y + self.rad*math.sin(angle)
             glVertex2f(x,y)
         glEnd()
 
@@ -112,11 +115,11 @@ class Arc:
         n = 20
         for t in range(0,n+1):
             t=t/n
-            point = ray.lerp(t)
-            dis = math.sqrt((point[0]-self.mid[0])**2 + (point[1]-self.mid[1])**2)
+            point = ray.start.lerp(ray.end,t)
+            dis = point.dis(self.mid)
             ob = Dragable(Ray((1,0),10))
-            dir = [point[0]-self.mid[0],point[1]-self.mid[1]]
-            di = [1,0]
+            dir = point.sub(self.mid)
+            di = Point(1,0)
             angle = (-ob.angle_bet(dir,di))%(2*math.pi)
             if(abs(dis-self.rad)<0.5):
                if(self.start_angle<self.end_angle and angle>self.start_angle and angle<self.end_angle):
@@ -168,10 +171,10 @@ class Dragable:
         s = ((x4-x3)*(y1-y3)-(y4-y3)*(x1-x3))/denom
         t = ((x2-x1)*(y1-y3)-(y2-y1)*(x1-x3))/denom
         return (s>=0 and s<=1) and (t>=0 and t<=1)
-    def reflect(self,dir,point):
-        dir1 = np.array(dir,dtype=float)
+    def reflect(self,dir:Point,point):
+        dir1 = np.array(dir.toarray(),dtype=float)
         if(isinstance(self.drag,Ray)):
-            dir2 = np.array(self.drag.dir,dtype=float)
+            dir2 = np.array(self.drag.dir.toarray(),dtype=float)
             nor = np.array([-dir2[1],dir2[0]],dtype=float)
         elif(isinstance(self.drag,Arc)):
             nor = np.array([self.drag.mid[0]-point[0],self.drag.mid[1]-point[1]],dtype=float)
@@ -179,8 +182,8 @@ class Dragable:
         r = dir1 - 2 * np.dot(dir1,nor) / nsq * nor
         return r
     def angle_bet(self,dir,di):
-        dir1 = np.array(dir,dtype=float)
-        dir2 = np.array(di,dtype=float)
+        dir1 = np.array(dir.toarray(),dtype=float)
+        dir2 = np.array(di.toarray(),dtype=float)
         nor1 = np.linalg.norm(dir1)
         nor2 = np.linalg.norm(dir2)
         cross_product = dir1[0] * dir2[1] - dir1[1] * dir2[0]
@@ -192,14 +195,14 @@ class Dragable:
         angle_val = -1*np.arctan2(cross_product, dot_product)
         return float(angle_val)
 
-    def rotate_point(self,angle,p1,p2=0):
-        if p2==0:
-            p2 = [0,0]
-        dx = p1[0] - p2[0]
-        dy = p1[1] - p2[1]
-        x = (dx * np.cos(angle) - dy * np.sin(angle)) + p2[0]
-        y = (dx * np.sin(angle) + dy * np.cos(angle)) + p2[1]
-        return [x,y]
+    def rotate_point(self,angle,p1:Point,p2=None):
+        if p2 is None:
+            p2 = Point(0,0)
+        dx = p1.sub(p2)
+        dy = p1.sub()
+        x = (dx * np.cos(angle) - dy * np.sin(angle)) + p2.x
+        y = (dx * np.sin(angle) + dy * np.cos(angle)) + p2.y
+        return Point(x,y)
 
     def rotate(self,angle):
         if(isinstance(self.drag,Ray)):
@@ -227,7 +230,7 @@ class Dragable:
 class Ray_Shooter(Dragable):
     def __init__(self,color=(0.9,0.1,0.3)):
         self.rad = 15
-        self.mid = [ini_pos[0],ini_pos[1]]
+        self.mid = Point(ini_pos[0],ini_pos[1])
         self.dragging = False
         self.color = color
 
@@ -235,26 +238,25 @@ class Ray_Shooter(Dragable):
         step = 2*math.pi/segments
         glColor3f(*self.color)
         glBegin(GL_TRIANGLE_FAN)
-        glVertex2f(self.mid[0],self.mid[1])
+        glVertex2f(self.mid.x,self.mid.y)
         for i in range(segments+1):
             angle = i*step
-            x = self.mid[0] + self.rad*math.cos(angle)
-            y = self.mid[1] + self.rad*math.sin(angle)
+            x = self.mid.x + self.rad*math.cos(angle)
+            y = self.mid.y + self.rad*math.sin(angle)
             glVertex2f(x,y)
         glEnd()
         
 
     def is_close(self,point):
             dis = self.rad
-            dist = math.sqrt((point[0]-self.mid[0])**2 + (point[1]-self.mid[1])**2)
+            dist = point.dis(self.mid)
             if (dist<dis):
                 return True
             else:
                 return False
 
     def move_to(self,point):
-        self.mid[0] = point[0]
-        self.mid[1] = point[1]
+        self.mid = point
 
 class Material:
     def __init__(self,index,color=(0.8,0.2,0.4)):
