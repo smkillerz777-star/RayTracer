@@ -61,15 +61,15 @@ class Ray:
         self.color = color
 
     def move(self,dt):
-        print("called")
         change = self.dir.mul(self.speed*dt)
         self.start = self.start.add(change)
         self.end = self.end.add(change)
         self.mid = self.mid.add(change)
 
-    def change_dir(self,dir:Point):
+    def change_dir(self,dir):
         if(dir is None):
             return
+        dir = Point(dir[0],dir[1])
         self.dir = dir
         self.start = self.end.copy()
         self.end = self.start.add(self.dir.mul(self.size))
@@ -100,7 +100,7 @@ class Arc:
         else:
             self.start_angle = start % (2*math.pi)
             self.end_angle = (start+angle) % (2*math.pi)
-        self.mid = Point(pos[0],pos[1])
+        self.mid = Point(pos.x,pos.y)
         self.size = rad
         self.color = color
 
@@ -150,7 +150,6 @@ class Dragable:
         
     def move_to(self,point:Point):
         mid = self.drag.mid.copy()
-        print("moving")
         if(isinstance(self.drag,Ray)):
             self.drag.start = self.drag.start.add(point.sub(mid))
             self.drag.end = self.drag.end.add(point.sub(mid))
@@ -237,7 +236,7 @@ class Dragable:
 class Ray_Shooter(Dragable):
     def __init__(self,color=(0.9,0.1,0.3)):
         self.rad = 15
-        self.mid = Point(ini_pos[0],ini_pos[1])
+        self.mid = Point(ini_pos.x,ini_pos.y)
         self.dragging = False
         self.color = color
 
@@ -277,11 +276,11 @@ class Material:
         step = 2*math.pi/segments
         glColor4f(*col)
         glBegin(GL_TRIANGLE_FAN)
-        glVertex2f(self.surface.mid[0],self.surface.mid[1])
+        glVertex2f(self.surface.mid.x,self.surface.mid.y)
         for i in range(segments+1):
             angle = i*step
-            x = self.surface.mid[0] + self.surface.rad*math.cos(angle)
-            y = self.surface.mid[1] + self.surface.rad*math.sin(angle)
+            x = self.surface.mid.x + self.surface.rad*math.cos(angle)
+            y = self.surface.mid.y + self.surface.rad*math.sin(angle)
             glVertex2f(x,y)
         glEnd()
         self.surface.draw()
@@ -292,15 +291,14 @@ class Material:
             self.index=1
 
     def move_to(self,point):
-        self.surface.mid[0] = point[0]
-        self.surface.mid[1] = point[1]
+        self.surface.mid = point.copy()
 
     def is_inside(self,ray:Ray):
         return self.is_point_inside(ray.start) or self.is_point_inside(ray.end)
 
     def is_point_inside(self,point):
         mid = self.surface.mid
-        dis = math.sqrt((mid[0]-point[0])**2+(mid[1]-point[1])**2)
+        dis = mid.dis(point)
         if(dis<self.surface.rad):
             return True
         return False
@@ -309,9 +307,9 @@ class Material:
         point = self.get_collision_point(ray)
         if(point==None):
             return 
-        nor = np.array((self.surface.mid[0]-point[0],self.surface.mid[1]-point[1]))
+        nor = np.array((self.surface.mid.x-point.x,self.surface.mid.y-point.y))
         nor = nor/np.linalg.norm(nor)
-        inc = np.array((ray.dir[0],ray.dir[1]))
+        inc = np.array((ray.dir.x,ray.dir.y))
         inc = inc/np.linalg.norm(inc)
         cos1 = -1*np.dot(nor,inc)
         meu = self.index
@@ -330,19 +328,14 @@ class Material:
         n = 20
         for t in range(n+1):
             t = t/n
-            point = self.lerp(ray,t)
-            dis = math.sqrt((self.surface.mid[0]-point[0])**2+(self.surface.mid[1]-point[1])**2)
+            point = ray.start.lerp(ray.end,t)
+            dis = self.surface.mid.dis(point)
             rad = self.surface.rad
             diff = abs(dis-rad)
             if(diff<0.3):
-                return [point[0],point[1]]
+                return point.copy()
         return None
     
-    def lerp(self,ray,t):
-        x = ray.start[0] + t*(ray.end[0]-ray.start[0])
-        y = ray.start[1] + t*(ray.end[1]-ray.start[1])
-        return [x,y]
-
 class Button:
     def __init__(self,text,x,y,width,height):
         font = pygame.font.SysFont("Arial", 24)

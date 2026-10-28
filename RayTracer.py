@@ -87,7 +87,7 @@ def main():
                                     break
                             else:
                                 for shooter in shooters:
-                                    rays.append(Classes.Ray((event_pos.x-shooter.mid.x,event_pos.y-shooter.mid.y),pos=shooter.mid))
+                                    rays.append(Classes.Ray(Point(event_pos.x-shooter.mid.x,event_pos.y-shooter.mid.y),pos=shooter.mid))
                 elif(scene==2):
                      if(restart_button.is_close(mouse_pos)):
                          scene=1
@@ -161,7 +161,7 @@ def main():
                         pygame.mouse.set_cursor(default_cursor)
             dt = clock.tick(60)/1000.0
             for ray in rays:
-                if(not screen.get_rect().collidepoint(ray.mid[0],ray.mid[1])):
+                if(not screen.get_rect().collidepoint(ray.mid.x,ray.mid.y)):
                     rays.remove(ray)
                     continue
                 ray.draw()
