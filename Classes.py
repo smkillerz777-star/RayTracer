@@ -6,6 +6,36 @@ from pygame.locals import *
 import numpy as np
 ini_pos = (100,360)
 screen = None
+class Point:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        self.mag = math.sqrt(x**2+y**2)
+
+    def add(self,point):
+        x = self.x + point.x
+        y = self.y + point.y
+        return Point(x,y)
+
+    def sub(self,point):
+        x = self.x - point.x
+        y = self.y - point.y
+        return Point(x,y)
+
+    def mul(self,num):
+        x = self.x*num
+        y = self.y*num
+        return Point(x,y)
+
+    def dot(self,point):
+        return (self.x*point.x + self.y*point.y)
+
+    def cross(self,point):
+        return (self.x*point.y - self.y*point.x)
+
+    def dis(self,point):
+        sub = self.sub(point)
+        return sub.mag
 class Ray:
     def __init__(self,dir,size=10.0,pos=ini_pos,color=(0.8,0.2,0.4,1)):
         self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]
@@ -339,6 +369,7 @@ class Player:
         self.color = col
         self.heath = 100
 
+
     def move(self):
         move = [0,0]
         keys = pygame.key.get_pressed()
@@ -362,7 +393,7 @@ class Player:
         return True
 
     def draw(self,segments=60):
-        scale = 1
+        scale = 2
         torso_width = 7*scale
         inner_torso_width = 3*scale
         torso_height = 10*scale
@@ -455,19 +486,33 @@ class Capsule:
     def __init__(self,height,rad,pos):
         self.height = height
         self.rad = rad
-        self.pos = pos
-        self.top = [self.pos[0],self.pos[1]-self.height/2]
-        self.bottom = [self.pos[0],self.pos[1]+self.height/2]
+        self.pos = Point(pos[0],pos[1])
+        self.top = self.pos.add(Point(0,self.height/2))
+        self.bottom = self.pos.add(Point(0,self.height/2))
 
-    def is_colliding(self,point):
-        if(point[1]<self.top[1] or point[1]>self.bottom[1]):
+    def is_colliding(self,point:Point):
+        if(point.y<self.top.y or point.y>self.bottom.y):
             return False
-        closest_point = [self.pos[0],point[1]]
-        dis = 
-        if():
+        closest_point = Point(self.pos.x,point.y)
+        dis = closest_point.dis(point)
+        if(dis>self.rad):
+            return False
+        return True
 
-class Point:
-    def __init__(self,x,y):
-        self.x = x
-        self.y = y
-        self.mag = math.sqrt(x**2+y**2)
+    def draw(self,segments=60):
+        glColor4f(0,0.1,0.4,0.5)
+        glBegin(GL_QUADS)
+        glVertex2f(self.pos.x+self.rad,self.pos.y+self.height/2)
+        glVertex2f(self.pos.x+self.rad,self.pos.y-self.height/2)
+        glVertex2f(self.pos.x-self.rad,self.pos.y-self.height/2)
+        glVertex2f(self.pos.x-self.rad,self.pos.y+self.height/2)
+        glEnd()
+        glBegin(GL_TRIANGLE_FAN)
+        step = math.pi/segments
+        glVertex2f(self.pos.x,self.pos.y+self.height/2)
+        for i in range(segments+1):
+            angle = i*step
+            x = self.pos.x + math.cos(angle)
+            y = self.pos.y + self.height/2 + math.sin(angle)
+            glVertex2f(x,y)
+        glEnd()
