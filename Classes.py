@@ -45,6 +45,9 @@ class Point:
 
     def toarray(self):
         return [self.x,self.y]
+
+    def copy(self):
+        return Point(self.x,self.y)
 ini_pos = Point(100,360)
     
 class Ray:
@@ -58,6 +61,7 @@ class Ray:
         self.color = color
 
     def move(self,dt):
+        print("called")
         change = self.dir.mul(self.speed*dt)
         self.start = self.start.add(change)
         self.end = self.end.add(change)
@@ -67,10 +71,12 @@ class Ray:
         if(dir is None):
             return
         self.dir = dir
-        self.start = self.end
+        self.start = self.end.copy()
         self.end = self.start.add(self.dir.mul(self.size))
 
     def draw(self):
+        print(self.mid.x)
+        print(self.start.x)
         glColor4f(*self.color)
         glLineWidth(2)
         glBegin(GL_LINES)
@@ -143,11 +149,12 @@ class Dragable:
             return False
         
     def move_to(self,point:Point):
-        mid = self.drag.mid
+        mid = self.drag.mid.copy()
+        print("moving")
         if(isinstance(self.drag,Ray)):
-            self.drag.start.add(point.sub(mid))
-            self.drag.end.add(point.sub(mid))
-        self.drag.mid = point
+            self.drag.start = self.drag.start.add(point.sub(mid))
+            self.drag.end = self.drag.end.add(point.sub(mid))
+        self.drag.mid = point.copy()
 
     def is_colliding(self,ray):
         if(isinstance(self.drag,Ray)):

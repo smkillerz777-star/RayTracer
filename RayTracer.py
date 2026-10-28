@@ -143,8 +143,8 @@ def main():
             player.move()
             for mat in mats:
                 mat.draw()
-            for drag_test in drags:
-                if drag_test.is_close(mouse_pos):
+            for drag in drags:
+                if drag.is_close(mouse_pos):
                     pygame.mouse.set_cursor(motion_cursor)
                     break
             else:
