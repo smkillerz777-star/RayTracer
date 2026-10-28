@@ -337,6 +337,7 @@ class Player:
         self.pos = pos
         self.step = 4
         self.color = col
+        self.heath = 100
 
     def move(self):
         move = [0,0]
@@ -356,6 +357,9 @@ class Player:
         move[1] = move[1]/mag*self.step
         self.pos[0] += move[0]
         self.pos[1] += move[1]
+
+    def is_colliding(self,point):
+        return True
 
     def draw(self,segments=60):
         scale = 1
@@ -445,3 +449,25 @@ class Player:
         glVertex2f(self.pos[0]-inner_torso_width,self.pos[1]+torso_height)
 
         glEnd()
+
+class Capsule:
+
+    def __init__(self,height,rad,pos):
+        self.height = height
+        self.rad = rad
+        self.pos = pos
+        self.top = [self.pos[0],self.pos[1]-self.height/2]
+        self.bottom = [self.pos[0],self.pos[1]+self.height/2]
+
+    def is_colliding(self,point):
+        if(point[1]<self.top[1] or point[1]>self.bottom[1]):
+            return False
+        closest_point = [self.pos[0],point[1]]
+        dis = 
+        if():
+
+class Point:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        self.mag = math.sqrt(x**2+y**2)
