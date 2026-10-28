@@ -364,11 +364,11 @@ class Label:
 
 class Player:
     def __init__(self,pos,col=(23,50,100)):
-        self.pos = pos
+        self.pos = Point(pos[0],pos[1])
         self.step = 4
         self.color = col
         self.heath = 100
-
+        self.collider = Capsule(52,23,self.pos.add(Point(0,8)))
 
     def move(self):
         move = [0,0]
@@ -386,8 +386,10 @@ class Player:
             return
         move[0] = move[0]/mag*self.step
         move[1] = move[1]/mag*self.step
-        self.pos[0] += move[0]
-        self.pos[1] += move[1]
+        self.pos.x += move[0]
+        self.pos.y += move[1]
+        self.collider.pos.x += move[0]
+        self.collider.pos.y += move[1]
 
     def is_colliding(self,point):
         return True
@@ -398,7 +400,7 @@ class Player:
         inner_torso_width = 3*scale
         torso_height = 10*scale
         face_rad = 5*scale
-        head_cen = [self.pos[0],self.pos[1]-torso_height-face_rad]
+        head_cen = [self.pos.x,self.pos.y-torso_height-face_rad]
         sh_angle = 30/180*math.pi
         sh_width = 3*scale
         leg_width = 6*scale
@@ -407,10 +409,10 @@ class Player:
         glBegin(GL_QUADS)
         #torso
         glColor3f(0.48, 0.04, 0.09)
-        glVertex2f(self.pos[0]-torso_width,self.pos[1]-torso_height)
-        glVertex2f(self.pos[0]+torso_width,self.pos[1]-torso_height)
-        glVertex2f(self.pos[0]+torso_width,self.pos[1]+torso_height)
-        glVertex2f(self.pos[0]-torso_width,self.pos[1]+torso_height)
+        glVertex2f(self.pos.x-torso_width,self.pos.y-torso_height)
+        glVertex2f(self.pos.x+torso_width,self.pos.y-torso_height)
+        glVertex2f(self.pos.x+torso_width,self.pos.y+torso_height)
+        glVertex2f(self.pos.x-torso_width,self.pos.y+torso_height)
         glEnd()
         glBegin(GL_TRIANGLE_FAN)
         #head
@@ -426,67 +428,68 @@ class Player:
         #shoulders
         glColor3f(0.48, 0.04, 0.09)
 
-        glVertex2f(self.pos[0]+torso_width,self.pos[1]-torso_height)
-        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]-torso_height+2)
-        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]+torso_height-2)
-        glVertex2f(self.pos[0]+torso_width+1,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos.x+torso_width,self.pos.y-torso_height)
+        glVertex2f(self.pos.x+torso_width+sh_width,self.pos.y-torso_height+2)
+        glVertex2f(self.pos.x+torso_width+sh_width,self.pos.y+torso_height-2)
+        glVertex2f(self.pos.x+torso_width+1,self.pos.y+torso_height-2)
 
-        glVertex2f(self.pos[0]-torso_width,self.pos[1]-torso_height)
-        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]-torso_height+2)
-        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]+torso_height-2)
-        glVertex2f(self.pos[0]-torso_width-1,self.pos[1]+torso_height-2)
+        glVertex2f(self.pos.x-torso_width,self.pos.y-torso_height)
+        glVertex2f(self.pos.x-torso_width-sh_width,self.pos.y-torso_height+2)
+        glVertex2f(self.pos.x-torso_width-sh_width,self.pos.y+torso_height-2)
+        glVertex2f(self.pos.x-torso_width-1,self.pos.y+torso_height-2)
         #hands
         glColor3f(0.95, 0.76, 0.64)
 
-        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]+torso_height-2)
-        glVertex2f(self.pos[0]-torso_width-1,self.pos[1]+torso_height-2)
-        glVertex2f(self.pos[0]-torso_width-1,self.pos[1]+torso_height)
-        glVertex2f(self.pos[0]-torso_width-sh_width,self.pos[1]+torso_height)
+        glVertex2f(self.pos.x-torso_width-sh_width,self.pos.y+torso_height-2)
+        glVertex2f(self.pos.x-torso_width-1,self.pos.y+torso_height-2)
+        glVertex2f(self.pos.x-torso_width-1,self.pos.y+torso_height)
+        glVertex2f(self.pos.x-torso_width-sh_width,self.pos.y+torso_height)
 
-        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]+torso_height-2)
-        glVertex2f(self.pos[0]+torso_width+1,self.pos[1]+torso_height-2)
-        glVertex2f(self.pos[0]+torso_width+1,self.pos[1]+torso_height)
-        glVertex2f(self.pos[0]+torso_width+sh_width,self.pos[1]+torso_height)
+        glVertex2f(self.pos.x+torso_width+sh_width,self.pos.y+torso_height-2)
+        glVertex2f(self.pos.x+torso_width+1,self.pos.y+torso_height-2)
+        glVertex2f(self.pos.x+torso_width+1,self.pos.y+torso_height)
+        glVertex2f(self.pos.x+torso_width+sh_width,self.pos.y+torso_height)
         #leg
         glColor3f(0.11, 0.12, 0.15)
 
-        glVertex2f(self.pos[0]+torso_width,self.pos[1]+torso_height)
-        glVertex2f(self.pos[0],self.pos[1]+torso_height)
-        glVertex2f(self.pos[0]+1,self.pos[1]+torso_height+leg_height)
-        glVertex2f(self.pos[0]+1+leg_width,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos.x+torso_width,self.pos.y+torso_height)
+        glVertex2f(self.pos.x,self.pos.y+torso_height)
+        glVertex2f(self.pos.x+1,self.pos.y+torso_height+leg_height)
+        glVertex2f(self.pos.x+1+leg_width,self.pos.y+torso_height+leg_height)
 
-        glVertex2f(self.pos[0]-torso_width,self.pos[1]+torso_height)
-        glVertex2f(self.pos[0],self.pos[1]+torso_height)
-        glVertex2f(self.pos[0]-1,self.pos[1]+torso_height+leg_height)
-        glVertex2f(self.pos[0]-1-leg_width,self.pos[1]+torso_height+leg_height)
+        glVertex2f(self.pos.x-torso_width,self.pos.y+torso_height)
+        glVertex2f(self.pos.x,self.pos.y+torso_height)
+        glVertex2f(self.pos.x-1,self.pos.y+torso_height+leg_height)
+        glVertex2f(self.pos.x-1-leg_width,self.pos.y+torso_height+leg_height)
         #feet
         glColor3f(0.24, 0.16, 0.12)
 
-        glVertex2f(self.pos[0]+1,self.pos[1]+torso_height+leg_height)
-        glVertex2f(self.pos[0]+1+leg_width,self.pos[1]+torso_height+leg_height)
-        glVertex2f(self.pos[0]+1+leg_width,self.pos[1]+torso_height+leg_height+4)
-        glVertex2f(self.pos[0]+1,self.pos[1]+torso_height+leg_height+4)
+        glVertex2f(self.pos.x+1,self.pos.y+torso_height+leg_height)
+        glVertex2f(self.pos.x+1+leg_width,self.pos.y+torso_height+leg_height)
+        glVertex2f(self.pos.x+1+leg_width,self.pos.y+torso_height+leg_height+4)
+        glVertex2f(self.pos.x+1,self.pos.y+torso_height+leg_height+4)
 
-        glVertex2f(self.pos[0]-1,self.pos[1]+torso_height+leg_height)
-        glVertex2f(self.pos[0]-1-leg_width,self.pos[1]+torso_height+leg_height)
-        glVertex2f(self.pos[0]-1-leg_width,self.pos[1]+torso_height+leg_height+4)
-        glVertex2f(self.pos[0]-1,self.pos[1]+torso_height+leg_height+4)
+        glVertex2f(self.pos.x-1,self.pos.y+torso_height+leg_height)
+        glVertex2f(self.pos.x-1-leg_width,self.pos.y+torso_height+leg_height)
+        glVertex2f(self.pos.x-1-leg_width,self.pos.y+torso_height+leg_height+4)
+        glVertex2f(self.pos.x-1,self.pos.y+torso_height+leg_height+4)
         #stomach
         glColor3f(0,0,0)
 
-        glVertex2f(self.pos[0]-inner_torso_width,self.pos[1]-torso_height)
-        glVertex2f(self.pos[0]+inner_torso_width,self.pos[1]-torso_height)
-        glVertex2f(self.pos[0]+inner_torso_width,self.pos[1]+torso_height)
-        glVertex2f(self.pos[0]-inner_torso_width,self.pos[1]+torso_height)
+        glVertex2f(self.pos.x-inner_torso_width,self.pos.y-torso_height)
+        glVertex2f(self.pos.x+inner_torso_width,self.pos.y-torso_height)
+        glVertex2f(self.pos.x+inner_torso_width,self.pos.y+torso_height)
+        glVertex2f(self.pos.x-inner_torso_width,self.pos.y+torso_height)
 
         glEnd()
+        self.collider.draw()
 
 class Capsule:
 
-    def __init__(self,height,rad,pos):
+    def __init__(self,height,rad,pos:Point):
         self.height = height
         self.rad = rad
-        self.pos = Point(pos[0],pos[1])
+        self.pos = Point(pos.x,pos.y)
         self.top = self.pos.add(Point(0,self.height/2))
         self.bottom = self.pos.add(Point(0,self.height/2))
 
@@ -500,7 +503,7 @@ class Capsule:
         return True
 
     def draw(self,segments=60):
-        glColor4f(0,0.1,0.4,0.5)
+        glColor4f(0,0.1,0.4,0.3)
         glBegin(GL_QUADS)
         glVertex2f(self.pos.x+self.rad,self.pos.y+self.height/2)
         glVertex2f(self.pos.x+self.rad,self.pos.y-self.height/2)
@@ -512,7 +515,15 @@ class Capsule:
         glVertex2f(self.pos.x,self.pos.y+self.height/2)
         for i in range(segments+1):
             angle = i*step
-            x = self.pos.x + math.cos(angle)
-            y = self.pos.y + self.height/2 + math.sin(angle)
+            x = self.pos.x + self.rad*math.cos(angle)
+            y = self.pos.y + self.height/2 + self.rad*math.sin(angle)
+            glVertex2f(x,y)
+        glEnd()
+        glBegin(GL_TRIANGLE_FAN)
+        glVertex2f(self.pos.x,self.pos.y-self.height/2)
+        for i in range(segments+1):
+            angle = math.pi + i*step
+            x = self.pos.x + self.rad*math.cos(angle)
+            y = self.pos.y - self.height/2 + self.rad*math.sin(angle)
             glVertex2f(x,y)
         glEnd()
