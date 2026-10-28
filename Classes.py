@@ -36,48 +36,50 @@ class Point:
     def dis(self,point):
         sub = self.sub(point)
         return sub.mag
+
+    def lerp(self,point,t):
+        sub = point.sub(self)
+        return (self.add(sub.mul(t)))
+
+    def norm(self):
+        return self.mul(1/self.mag)
+    
 class Ray:
     def __init__(self,dir,size=10.0,pos=ini_pos,color=(0.8,0.2,0.4,1)):
-        self.dir = [dir[0]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1]),dir[1]/math.sqrt(dir[0]*dir[0]+dir[1]*dir[1])]
+        self.dir = Point(dir[0],dir[1]).norm()
         self.speed = 60
         self.size = size
-        self.start = [pos[0],pos[1]]
-        self.end = [pos[0] + self.dir[0]*self.size,pos[1] + self.dir[1]*self.size]
-        self.mid = [(self.end[0]+self.start[0])/2,(self.end[1]+self.start[1])/2]
+        self.start = Point(pos[0],pos[1])
+        self.end = self.start.add(self.dir.mul(self.size))
+        self.mid = self.start.add(self.end).mul(1/2)
         self.color = color
 
     def move(self,dt):
-        self.start[0] = self.start[0] + (self.dir[0]*self.speed*dt)
-        self.start[1] = self.start[1] + (self.dir[1]*self.speed*dt)
-        self.end[0] = self.end[0] + (self.dir[0]*self.speed*dt)
-        self.end[1] = self.end[1] + (self.dir[1]*self.speed*dt)
-        self.mid[0] = self.mid[0] + (self.dir[0]*self.speed*dt)
-        self.mid[1] = self.mid[1] + (self.dir[1]*self.speed*dt)
+        change = self.dir.mul(self.speed*dt)
+        self.start = self.start.add(change)
+        self.end = self.end.add(change)
+        self.mid = self.mid.add(change)
 
-    def change_dir(self,dir):
+    def change_dir(self,dir:Point):
         if(dir is None):
             return
         self.dir = dir
-        self.start = [self.end[0],self.end[1]]
-        self.end = [self.start[0]+dir[0]*self.size,self.start[1]+dir[1]*self.size]
+        self.start = self.end
+        self.end = self.start.add(self.dir.mul(self.size))
 
     def draw(self):
         glColor4f(*self.color)
         glLineWidth(2)
         glBegin(GL_LINES)
-        glVertex2f(self.start[0],self.start[1])
-        glVertex2f(self.end[0],self.end[1])
+        glVertex2f(self.start.x,self.start.y)
+        glVertex2f(self.end.x,self.end.y)
         glEnd()
-
-    def lerp(self,t):
-        x = self.start[0] + t*(self.end[0]-self.start[0])
-        y = self.start[1] + t*(self.end[1]-self.start[1])
-        return [x,y]
 
     def change_size(self,ds):
         rate = 3
-        self.start = [self.mid[0] + self.dir[0]*(self.size+ds)/2*rate,self.mid[1] + self.dir[1]*(self.size+ds)/2*rate]
-        self.end = [self.mid[0] - self.dir[0]*(self.size+ds)/2*rate,self.mid[1] - self.dir[1]*(self.size+ds)/2*rate]
+        change = self.dir.mul((self.size+ds)/2)
+        self.start = self.mid.add(change)
+        self.end = self.mid.sub(change)
         self.size += ds*rate
 
 class Arc:
@@ -129,27 +131,24 @@ class Dragable:
         self.dragging = False
         self.rotating = False
 
-    def is_close(self,point,dis=5):
+    def is_close(self,point:Point,dis=5):
         dis += self.drag.size
-        dist = math.sqrt((point[0]-self.drag.mid[0])**2 + (point[1]-self.drag.mid[1])**2)
+        dist = self.drag.mid.dis(point)
         if (dist<dis):
             return True
         else:
             return False
         
-    def move_to(self,point):
+    def move_to(self,point:Point):
         mid = self.drag.mid
         if(isinstance(self.drag,Ray)):
-            self.drag.start[0] += point[0]-mid[0]
-            self.drag.start[1] += point[1]-mid[1]
-            self.drag.end[0] += point[0]-mid[0]
-            self.drag.end[1] += point[1]-mid[1]
-        self.drag.mid[0] = point[0]
-        self.drag.mid[1] = point[1]
+            self.drag.start.add(point.sub(mid))
+            self.drag.end.add(point.sub(mid))
+        self.drag.mid = point
 
     def is_colliding(self,ray):
         if(isinstance(self.drag,Ray)):
-            return self.segmentIntersect(self.drag.start[0],self.drag.start[1],self.drag.end[0],self.drag.end[1],ray.start[0],ray.start[1],ray.end[0],ray.end[1]),None
+            return self.segmentIntersect(self.drag.start.x,self.drag.start.y,self.drag.end.x,self.drag.end.y,ray.start.x,ray.start.y,ray.end.x,ray.end.y),None
         else:
             return self.drag.is_colliding(ray)
         
@@ -391,8 +390,13 @@ class Player:
         self.collider.pos.x += move[0]
         self.collider.pos.y += move[1]
 
-    def is_colliding(self,point):
-        return True
+    def is_colliding(self,line:Ray,n = 20):
+        for i in range(n+1):
+            t = i/n
+            point = line.start.lerp(line.end,t)
+            if(self.collider.is_colliding(point)):
+                return True
+        return False
 
     def draw(self,segments=60):
         scale = 2

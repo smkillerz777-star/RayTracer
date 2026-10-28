@@ -36,6 +36,7 @@ def main():
     game_over_text = Classes.Label("GAME OVER",50,50,800,400)
     while running:
         mouse_pos = pygame.mouse.get_pos()
+        mouse_pos = Point(mouse_pos[0],mouse_pos[1])
         glClear(GL_COLOR_BUFFER_BIT)
         for event in pygame.event.get():
             if(event.type == pygame.QUIT):
