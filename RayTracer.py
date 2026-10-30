@@ -29,7 +29,7 @@ def main():
     shooters = []
     mats = []
     counter = 9
-    player = Classes.Player()
+    players = []
     glClearColor(0.1,0.5,0.4,1.0)
     start_button = Classes.Button("SIMULATION MODE",280,510,200,50)
     start_button_2 = Classes.Button("GAME MODE",640,510,150,50)
@@ -69,6 +69,8 @@ def main():
                     elif(start_button_2.is_close(mouse_pos)):
                         scene = 1
                         states.game_mode = 2
+                        for i in range(10):
+                            players.append(Classes.Player())
                 elif(scene==1):
                     if(event.button in (4,5,6,7)):
                         continue
@@ -97,7 +99,7 @@ def main():
                 elif(scene==2):
                      if(restart_button.is_close(mouse_pos)):
                          scene=1
-                         player.health = states.max_player_health
+                         players = players[0].next_gen(players)
             elif event.type == pygame.MOUSEMOTION:
                 if(scene==1):
                     for shooter in shooters:
@@ -155,7 +157,9 @@ def main():
         elif(scene==1):
             if(states.game_mode==2):
                 if(counter==9):
-                    player.move(rays)
+                    for player in players:
+                        if(player.is_alive):
+                            player.move(rays)
                     counter = 0
                 counter += 1
             for mat in mats:
@@ -177,6 +181,7 @@ def main():
                     else:
                         pygame.mouse.set_cursor(default_cursor)
             dt = clock.tick(60)/1000.0
+            rays_to_remove = []
             for ray in rays:
                 if(not screen.get_rect().collidepoint(ray.mid.x,ray.mid.y)):
                     rays.remove(ray)
@@ -189,20 +194,28 @@ def main():
                 for mat in mats:
                     if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
                         ray.change_dir(mat.refract(ray))
-                if(states.game_mode==2 and player.is_colliding(ray)):
-                    player.health -= states.damage
-                    rays.remove(ray)
-                    if(player.health<=0):
-                        drags = []
-                        rays = []
-                        shooters = []
-                        mats = []
-                        scene = 2
-                        break
-                    continue
-                ray.move(dt)
+                if(states.game_mode==2):
+                    for player in players:
+                        if(player.is_colliding(ray)):
+                            player.health -= states.damage
+                            rays_to_remove.append(ray)
+                            if(player.health<=0):
+                                player.is_alive = False
+                    else:
+                        ray.move(dt)
+            for ray in rays_to_remove:
+                rays.remove(ray)
             if(states.game_mode==2):
-                player.draw()
+                if any(p.is_alive for p in players):
+                    for player in players:
+                        if(player.is_alive):
+                            player.draw()
+                else:
+                    rays = []
+                    drags = []
+                    shooters = []
+                    mats = []
+                    scene = 2
             for shooter in shooters:
                 shooter.draw()
             for drag in drags:

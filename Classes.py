@@ -411,7 +411,9 @@ class Label:
         screen.blit(self.text_surf,self.text_rect)
 
 class Player:
-    def __init__(self,pos=(random.uniform(0,1080),random.uniform(0,720)),col=(23,50,100)):
+    def __init__(self,pos=None,col=(23,50,100)):
+        if(pos is None):
+            pos=(random.uniform(0,1080),random.uniform(0,720))
         self.pos = Point(pos[0],pos[1])
         self.step = 4
         self.color = col
@@ -419,10 +421,10 @@ class Player:
         self.collider = Capsule(52,23,self.pos.add(Point(0,8)))
         self.brain = Brain(8,10,2)
         self.fitness = 0
+        self.is_alive = True
 
     def format_input(self,rays,n=60):
         inputs = []
-        coun = 0
         max_ray_dis = 500
         for ray in rays:
             dist = 10000
@@ -454,8 +456,7 @@ class Player:
         move[1] = move[1]/mag*self.step
         self.pos.x += move[0]
         self.pos.y += move[1]
-        self.collider.pos.x += move[0]
-        self.collider.pos.y += move[1]
+        self.collider.move(move)
  
     def next_gen(dead_players):
         dead_players.sort(key=lambda p:p.fitness,reverse=True)
@@ -482,7 +483,7 @@ class Player:
         return False
 
     def draw(self,segments=60):
-        scale = 2
+        scale = 1
         torso_width = 7*scale
         inner_torso_width = 3*scale
         torso_height = 10*scale
@@ -589,6 +590,14 @@ class Capsule:
         if(dis>self.rad):
             return False
         return True
+
+    def move(self,move):
+        self.top.x += move[0]
+        self.top.y += move[1]
+        self.bottom.x += move[0]
+        self.bottom.y += move[1]
+        self.pos.x += move[0]
+        self.pos.y += move[1]
 
     def draw(self,segments=60):
         glColor4f(0,0.1,0.4,0.3)
