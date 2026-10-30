@@ -414,7 +414,7 @@ class Player:
         self.pos = Point(pos[0],pos[1])
         self.step = 4
         self.color = col
-        self.health = 100
+        self.health = states.max_player_health
         self.collider = Capsule(52,23,self.pos.add(Point(0,8)))
 
     def move(self):
@@ -547,10 +547,13 @@ class Capsule:
         self.bottom = self.pos.add(Point(0,self.height/2))
 
     def is_colliding(self,point:Point):
-        if(point.y<self.top.y or point.y>self.bottom.y):
+        if(point.y<(self.top.y-self.rad) or point.y>(self.bottom.y+self.rad)):
+            print("y",point.y)
             return False
         closest_point = Point(self.pos.x,point.y)
         dis = closest_point.dis(point)
+        print("rad",self.rad)
+        print("dis",dis)
         if(dis>self.rad):
             return False
         return True

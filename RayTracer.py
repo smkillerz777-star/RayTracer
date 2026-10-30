@@ -185,7 +185,7 @@ def main():
                     if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
                         ray.change_dir(mat.refract(ray))
                 if(states.game_mode==2 and player.is_colliding(ray)):
-                    player.health -= 10
+                    player.health -= states.damage
                     rays.remove(ray)
                     if(player.health<=0):
                         drags = []
