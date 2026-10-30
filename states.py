@@ -1,0 +1,1 @@
+is_collision_mode = True

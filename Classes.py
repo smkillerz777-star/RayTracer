@@ -4,6 +4,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
 import numpy as np
+import states
 screen = None
 class Point:
     def __init__(self,x,y):
@@ -75,8 +76,6 @@ class Ray:
         self.end = self.start.add(self.dir.mul(self.size))
 
     def draw(self):
-        print(self.mid.x)
-        print(self.start.x)
         glColor4f(*self.color)
         glLineWidth(2)
         glBegin(GL_LINES)
@@ -488,7 +487,8 @@ class Player:
         glVertex2f(self.pos.x-inner_torso_width,self.pos.y+torso_height)
 
         glEnd()
-        self.collider.draw()
+        if(states.is_collision_mode):
+            self.collider.draw()
 
 class Capsule:
 

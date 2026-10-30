@@ -3,7 +3,7 @@ import Classes
 from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
-from Classes import *
+import states
 default_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW)
 motion_cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_SIZEALL)
 
@@ -36,7 +36,7 @@ def main():
     game_over_text = Classes.Label("GAME OVER",50,50,800,400)
     while running:
         mouse_pos = pygame.mouse.get_pos()
-        mouse_pos = Point(mouse_pos[0],mouse_pos[1])
+        mouse_pos = Classes.Point(mouse_pos[0],mouse_pos[1])
         glClear(GL_COLOR_BUFFER_BIT)
         for event in pygame.event.get():
             if(event.type == pygame.QUIT):
@@ -59,7 +59,7 @@ def main():
                             mat.change_index(event.y)
             elif(event.type == pygame.MOUSEBUTTONDOWN):
                 event_pos = event.pos
-                event_pos = Point(event_pos[0],event_pos[1])
+                event_pos = Classes.Point(event_pos[0],event_pos[1])
                 if(scene==0):
                     if(start_button.is_close(mouse_pos)):
                         scene = 1
@@ -87,7 +87,7 @@ def main():
                                     break
                             else:
                                 for shooter in shooters:
-                                    rays.append(Classes.Ray(Point(event_pos.x-shooter.mid.x,event_pos.y-shooter.mid.y),pos=shooter.mid))
+                                    rays.append(Classes.Ray(Classes.Point(event_pos.x-shooter.mid.x,event_pos.y-shooter.mid.y),pos=shooter.mid))
                 elif(scene==2):
                      if(restart_button.is_close(mouse_pos)):
                          scene=1
@@ -118,13 +118,18 @@ def main():
             elif event.type == pygame.KEYDOWN:
                 if(scene==1):
                     if event.key == pygame.K_f:
-                        drags.append(Classes.Dragable(Classes.Ray(Point(1,0),100)))
+                        drags.append(Classes.Dragable(Classes.Ray(Classes.Point(1,0),100)))
                     elif event.key == pygame.K_g:
                         drags.append(Classes.Dragable(Classes.Arc(1.5,100)))
                     elif event.key == pygame.K_h:
                         shooters.append(Classes.Ray_Shooter())
                     elif event.key == pygame.K_j:
                         mats.append(Classes.Material(1.33))
+                    elif event.key == pygame.K_q:
+                        if(states.is_collision_mode):
+                            states.is_collision_mode = False
+                        else:
+                            states.is_collision_mode = True
                     elif event.key == pygame.K_DELETE:
                         for drag in drags:
                             if(drag.is_close(mouse_pos)):
