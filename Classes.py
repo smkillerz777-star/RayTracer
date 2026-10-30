@@ -55,7 +55,7 @@ ini_pos = Point(100,360)
 class Ray:
     def __init__(self,dir,size=10.0,pos=ini_pos,color=(0.8,0.2,0.4,1)):
         self.dir = Point(dir.x,dir.y).norm()
-        self.speed = 60
+        self.speed = 600
         self.size = size
         self.start = Point(pos.x,pos.y)
         self.end = self.start.add(self.dir.mul(self.size))
@@ -454,15 +454,20 @@ class Player:
             return
         move[0] = move[0]/mag*self.step
         move[1] = move[1]/mag*self.step
-        self.pos.x += move[0]
-        self.pos.y += move[1]
-        self.collider.move(move)
+        target_x = self.pos.x + move[0]
+        target_y = self.pos.y + move[1]
+        target_x = max(20,min(target_x,1080-20))
+        target_y = max(20,min(target_y,720-20))
+        actual_move = [target_x-self.pos.x,target_y-self.pos.y]
+        self.pos.x += actual_move[0]
+        self.pos.y += actual_move[1]
+        self.collider.move(actual_move)
  
-    def next_gen(dead_players):
+    def next_gen(self,dead_players):
         dead_players.sort(key=lambda p:p.fitness,reverse=True)
         champ = dead_players[0]
         new_pop = []
-        champ_clone = champ.Player()
+        champ_clone = Player()
         champ_clone.brain = champ.brain.clone()
         new_pop.append(champ_clone)
 
@@ -640,7 +645,7 @@ class Brain:
         return output
 
     def clone(self):
-        new_brain = Brain(self.weights_ih[0],self.weights_ih[1],self.weights_ho[1])
+        new_brain = Brain(self.weights_ih.shape[0],self.weights_ih.shape[1],self.weights_ho.shape[1])
         new_brain.weights_ih = np.copy(self.weights_ih)
         new_brain.weights_ho = np.copy(self.weights_ho)
         return new_brain

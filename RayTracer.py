@@ -184,7 +184,7 @@ def main():
             rays_to_remove = []
             for ray in rays:
                 if(not screen.get_rect().collidepoint(ray.mid.x,ray.mid.y)):
-                    rays.remove(ray)
+                    rays_to_remove.append(ray)
                     continue
                 ray.draw()
                 for drag_test in drags:
@@ -196,7 +196,7 @@ def main():
                         ray.change_dir(mat.refract(ray))
                 if(states.game_mode==2):
                     for player in players:
-                        if(player.is_colliding(ray)):
+                        if(player.is_colliding(ray) and player.is_alive):
                             player.health -= states.damage
                             rays_to_remove.append(ray)
                             if(player.health<=0):
@@ -204,7 +204,8 @@ def main():
                     else:
                         ray.move(dt)
             for ray in rays_to_remove:
-                rays.remove(ray)
+                if(ray in rays):
+                    rays.remove(ray)
             if(states.game_mode==2):
                 if any(p.is_alive for p in players):
                     for player in players:
