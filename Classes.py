@@ -336,21 +336,59 @@ class Material:
         return None
     
 class Button:
-    def __init__(self,text,x,y,width,height):
-        font = pygame.font.SysFont("Arial", 24)
+    def __init__(self, text, x, y, width, height):
+        if not pygame.font.get_init():
+            pygame.font.init()
+            
+        self.font = pygame.font.SysFont("Arial", 24, bold=True)
         self.text = text
-        self.rect = pygame.Rect(x,y,width,height)
-        self.color = (233,22,100)
-        self.text_surf = font.render(text,True,(255,255,255))
-        self.text_rect = self.text_surf.get_rect(center=self.rect.center)
+        self.rect = pygame.Rect(x, y, width, height)
+        self.color = (233, 22, 100)
+        self.tex_id, self.tex_w, self.tex_h = self.create_text_texture()
+
+    def create_text_texture(self):
+        surf = self.font.render(self.text, True, (255, 255, 255))
+        w, h = surf.get_size()
+        data = pygame.image.tobytes(surf, "RGBA", True)
+
+        tex_id = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, tex_id)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, data)
+        glBindTexture(GL_TEXTURE_2D, 0)
+
+        return tex_id, w, h
+
+    def is_close(self, point):
+        return self.rect.collidepoint(point.x, point.y)
 
     def draw(self):
-        pygame.draw.rect(screen,self.color,self.rect,border_radius=5)
-        screen.blit(self.text_surf,self.text_rect)
+        while glGetError() != GL_NO_ERROR:
+            pass
+        glColor3f(self.color[0] / 255.0, self.color[1] / 255.0, self.color[2] / 255.0)
+        glBegin(GL_QUADS)
+        glVertex2f(self.rect.x, self.rect.y)
+        glVertex2f(self.rect.x + self.rect.width, self.rect.y)
+        glVertex2f(self.rect.x + self.rect.width, self.rect.y + self.rect.height)
+        glVertex2f(self.rect.x, self.rect.y + self.rect.height)
+        glEnd()
+        text_x = self.rect.x + (self.rect.width - self.tex_w) / 2.0
+        text_y = self.rect.y + (self.rect.height - self.tex_h) / 2.0
 
-    def is_close(self,pos):
-        return self.rect.collidepoint(pos)
+        glEnable(GL_TEXTURE_2D)
+        glBindTexture(GL_TEXTURE_2D, self.tex_id)
+        glColor4f(1.0, 1.0, 1.0, 1.0)
 
+        glBegin(GL_QUADS)
+        glTexCoord2f(0.0, 1.0); glVertex2f(text_x, text_y)
+        glTexCoord2f(1.0, 1.0); glVertex2f(text_x + self.tex_w, text_y)
+        glTexCoord2f(1.0, 0.0); glVertex2f(text_x + self.tex_w, text_y + self.tex_h)
+        glTexCoord2f(0.0, 0.0); glVertex2f(text_x, text_y + self.tex_h)
+        glEnd()
+
+        glBindTexture(GL_TEXTURE_2D, 0)
+        glDisable(GL_TEXTURE_2D)
 class Label:
     def __init__(self,text,x,y,width,height,color=(255,255,255)):
         self.text = text
@@ -367,7 +405,7 @@ class Player:
         self.pos = Point(pos[0],pos[1])
         self.step = 4
         self.color = col
-        self.heath = 100
+        self.health = 100
         self.collider = Capsule(52,23,self.pos.add(Point(0,8)))
 
     def move(self):
@@ -391,7 +429,7 @@ class Player:
         self.collider.pos.x += move[0]
         self.collider.pos.y += move[1]
 
-    def is_colliding(self,line:Ray,n = 50):
+    def is_colliding(self,line:Ray,n = 60):
         for i in range(n+1):
             t = i/n
             point = line.start.lerp(line.end,t)
@@ -493,7 +531,6 @@ class Player:
 class Capsule:
 
     def __init__(self,height,rad,pos:Point):
-        print("heigth:",height)
         self.height = height
         self.rad = rad
         self.pos = Point(pos.x,pos.y)
@@ -501,10 +538,7 @@ class Capsule:
         self.bottom = self.pos.add(Point(0,self.height/2))
 
     def is_colliding(self,point:Point):
-        #print(self.top.y)
-        #print(self.bottom.y)
         if(point.y<self.top.y or point.y>self.bottom.y):
-            #print("this was called")
             return False
         closest_point = Point(self.pos.x,point.y)
         dis = closest_point.dis(point)

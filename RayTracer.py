@@ -23,7 +23,7 @@ def main():
     running = True
     dt=0.0
     prev = 0
-    scene = 1
+    scene = 0
     rays = []
     drags = []
     shooters = []
@@ -178,9 +178,19 @@ def main():
                     if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
                         ray.change_dir(mat.refract(ray))
                 if(player.is_colliding(ray)):
-                    scene = 2
+                    player.health -= 10
+                    rays.remove(ray)
+                    if(player.health<=0):
+                        drags = []
+                        rays = []
+                        shooters = []
+                        mats = []
+                        scene = 2
+                        break
+                    continue
                 ray.move(dt)
             player.draw()
+            print(player.health)
             for shooter in shooters:
                 shooter.draw()
             for drag in drags:
