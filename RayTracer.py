@@ -155,7 +155,7 @@ def main():
         elif(scene==1):
             if(states.game_mode==2):
                 if(counter==9):
-                    player.move()
+                    player.move(rays)
                     counter = 0
                 counter += 1
             for mat in mats:

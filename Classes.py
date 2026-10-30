@@ -417,11 +417,35 @@ class Player:
         self.color = col
         self.health = states.max_player_health
         self.collider = Capsule(52,23,self.pos.add(Point(0,8)))
+        self.brain = Brain(8,10,2)
 
-    def move(self):
+    def format_input(self,rays,n=60):
+        inputs = []
+        coun = 0
+        max_ray_dis = 500
+        for ray in rays:
+            dist = 10000
+            for i in range(n+1):
+                t = i/n
+                point = ray.start.lerp(ray.end,t)
+                dis = point.dis(self.pos)
+                if(dist>dis):
+                    dist = dis
+            dis = max(0,1-dist/max_ray_dis)
+            inputs.append(dis)
+        inputs.sort(reverse=True)
+        inputs = inputs[:8]
+        while(len(inputs)<8):
+            inputs.append(0)
+        return inputs
+
+
+    def move(self,rays):
         move = [0,0]
-        move[0] = random.uniform(-1,1)
-        move[1] = random.uniform(-1,1)
+        inputs = self.format_input(rays)
+        thought = self.brain.predict(inputs)
+        move[0] = thought[0]
+        move[1] = thought[1]
         mag = math.sqrt(move[0]**2+move[1]**2)
         if(mag==0):
             return
@@ -574,3 +598,17 @@ class Capsule:
             y = self.pos.y - self.height/2 + self.rad*math.sin(angle)
             glVertex2f(x,y)
         glEnd()
+
+class Brain:
+    def __init__(self,input_nodes,hidden_nodes,output_nodes):
+        self.weights_ih = np.random.randn(input_nodes,hidden_nodes)
+        self.weights_ho = np.random.randn(hidden_nodes,output_nodes)
+
+    def predict(self,inputs):
+        hidden = np.dot(inputs,self.weights_ih)
+        hidden = np.tanh(hidden)
+
+        output = np.dot(hidden,self.weights_ho)
+        output = np.tanh(output)
+
+        return output
