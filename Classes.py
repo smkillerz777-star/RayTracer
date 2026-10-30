@@ -391,7 +391,7 @@ class Player:
         self.collider.pos.x += move[0]
         self.collider.pos.y += move[1]
 
-    def is_colliding(self,line:Ray,n = 20):
+    def is_colliding(self,line:Ray,n = 50):
         for i in range(n+1):
             t = i/n
             point = line.start.lerp(line.end,t)
@@ -493,14 +493,18 @@ class Player:
 class Capsule:
 
     def __init__(self,height,rad,pos:Point):
+        print("heigth:",height)
         self.height = height
         self.rad = rad
         self.pos = Point(pos.x,pos.y)
-        self.top = self.pos.add(Point(0,self.height/2))
+        self.top = self.pos.sub(Point(0,self.height/2))
         self.bottom = self.pos.add(Point(0,self.height/2))
 
     def is_colliding(self,point:Point):
+        #print(self.top.y)
+        #print(self.bottom.y)
         if(point.y<self.top.y or point.y>self.bottom.y):
+            #print("this was called")
             return False
         closest_point = Point(self.pos.x,point.y)
         dis = closest_point.dis(point)

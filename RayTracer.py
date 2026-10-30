@@ -177,6 +177,8 @@ def main():
                 for mat in mats:
                     if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
                         ray.change_dir(mat.refract(ray))
+                if(player.is_colliding(ray)):
+                    scene = 2
                 ray.move(dt)
             player.draw()
             for shooter in shooters:
