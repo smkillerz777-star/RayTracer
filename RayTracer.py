@@ -28,6 +28,7 @@ def main():
     drags = []
     shooters = []
     mats = []
+    counter = 9
     player = Classes.Player([230,240])
     glClearColor(0.1,0.5,0.4,1.0)
     start_button = Classes.Button("SIMULATION MODE",280,510,200,50)
@@ -96,6 +97,7 @@ def main():
                 elif(scene==2):
                      if(restart_button.is_close(mouse_pos)):
                          scene=1
+                         player.health = states.max_player_health
             elif event.type == pygame.MOUSEMOTION:
                 if(scene==1):
                     for shooter in shooters:
@@ -152,7 +154,10 @@ def main():
 
         elif(scene==1):
             if(states.game_mode==2):
-                player.move()
+                if(counter==9):
+                    player.move()
+                    counter = 0
+                counter += 1
             for mat in mats:
                 mat.draw()
             for drag in drags:

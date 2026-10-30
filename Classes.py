@@ -1,5 +1,6 @@
 import math
 import pygame
+import random
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from pygame.locals import *
@@ -419,15 +420,8 @@ class Player:
 
     def move(self):
         move = [0,0]
-        keys = pygame.key.get_pressed()
-        if(keys[pygame.K_w]):
-            move[1] = -1
-        if(keys[pygame.K_a]):
-            move[0] = -1
-        if(keys[pygame.K_s]):
-            move[1] = 1
-        if(keys[pygame.K_d]):
-            move[0] = 1
+        move[0] = random.uniform(-1,1)
+        move[1] = random.uniform(-1,1)
         mag = math.sqrt(move[0]**2+move[1]**2)
         if(mag==0):
             return
@@ -548,12 +542,9 @@ class Capsule:
 
     def is_colliding(self,point:Point):
         if(point.y<(self.top.y-self.rad) or point.y>(self.bottom.y+self.rad)):
-            print("y",point.y)
             return False
         closest_point = Point(self.pos.x,point.y)
         dis = closest_point.dis(point)
-        print("rad",self.rad)
-        print("dis",dis)
         if(dis>self.rad):
             return False
         return True
