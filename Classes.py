@@ -411,13 +411,14 @@ class Label:
         screen.blit(self.text_surf,self.text_rect)
 
 class Player:
-    def __init__(self,pos,col=(23,50,100)):
+    def __init__(self,pos=(random.uniform(0,1080),random.uniform(0,720)),col=(23,50,100)):
         self.pos = Point(pos[0],pos[1])
         self.step = 4
         self.color = col
         self.health = states.max_player_health
         self.collider = Capsule(52,23,self.pos.add(Point(0,8)))
         self.brain = Brain(8,10,2)
+        self.fitness = 0
 
     def format_input(self,rays,n=60):
         inputs = []
@@ -455,6 +456,22 @@ class Player:
         self.pos.y += move[1]
         self.collider.pos.x += move[0]
         self.collider.pos.y += move[1]
+ 
+    def next_gen(dead_players):
+        dead_players.sort(key=lambda p:p.fitness,reverse=True)
+        champ = dead_players[0]
+        new_pop = []
+        champ_clone = champ.Player()
+        champ_clone.brain = champ.brain.clone()
+        new_pop.append(champ_clone)
+
+        for i in range(9):
+            child = Player()
+            child.brain = champ.brain.clone()
+            child.brain.mutate()
+            new_pop.append(child)
+
+        return new_pop
 
     def is_colliding(self,line:Ray,n = 60):
         for i in range(n+1):
@@ -612,3 +629,13 @@ class Brain:
         output = np.tanh(output)
 
         return output
+
+    def clone(self):
+        new_brain = Brain(self.weights_ih[0],self.weights_ih[1],self.weights_ho[1])
+        new_brain.weights_ih = np.copy(self.weights_ih)
+        new_brain.weights_ho = np.copy(self.weights_ho)
+        return new_brain
+
+    def mutate(self,mutation_rate = 0.1):
+        self.weights_ih += np.random.randn(*self.weights_ih.shape)*mutation_rate
+        self.weights_ho += np.random.randn(*self.weights_ho.shape)*mutation_rate

@@ -29,7 +29,7 @@ def main():
     shooters = []
     mats = []
     counter = 9
-    player = Classes.Player([230,240])
+    player = Classes.Player()
     glClearColor(0.1,0.5,0.4,1.0)
     start_button = Classes.Button("SIMULATION MODE",280,510,200,50)
     start_button_2 = Classes.Button("GAME MODE",640,510,150,50)
