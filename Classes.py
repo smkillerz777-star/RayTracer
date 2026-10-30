@@ -122,7 +122,7 @@ class Arc:
             t=t/n
             point = ray.start.lerp(ray.end,t)
             dis = point.dis(self.mid)
-            ob = Dragable(Ray((1,0),10))
+            ob = Dragable(Ray(Point(1,0),10))
             dir = point.sub(self.mid)
             di = Point(1,0)
             angle = (-ob.angle_bet(dir,di))%(2*math.pi)
@@ -177,18 +177,27 @@ class Dragable:
         t = ((x2-x1)*(y1-y3)-(y2-y1)*(x1-x3))/denom
         return (s>=0 and s<=1) and (t>=0 and t<=1)
     def reflect(self,dir:Point,point):
-        dir1 = np.array(dir.toarray(),dtype=float)
+        if(isinstance(dir,Point)):
+            dir1 = np.array(dir.toarray(),dtype=float)
+        else:
+            dir1 = np.array(dir,dtype=float)
         if(isinstance(self.drag,Ray)):
             dir2 = np.array(self.drag.dir.toarray(),dtype=float)
             nor = np.array([-dir2[1],dir2[0]],dtype=float)
         elif(isinstance(self.drag,Arc)):
-            nor = np.array([self.drag.mid[0]-point[0],self.drag.mid[1]-point[1]],dtype=float)
+            nor = np.array([self.drag.mid.x-point.x,self.drag.mid.y-point.y],dtype=float)
         nsq = np.dot(nor,nor)
         r = dir1 - 2 * np.dot(dir1,nor) / nsq * nor
         return r
     def angle_bet(self,dir,di):
-        dir1 = np.array(dir.toarray(),dtype=float)
-        dir2 = np.array(di.toarray(),dtype=float)
+        if(isinstance(dir,Point)):
+            dir1 = np.array(dir.toarray(),dtype=float)
+        else:
+            dir1 = np.array(dir,dtype=float)
+        if(isinstance(di,Point)):
+            dir2 = np.array(di.toarray(),dtype=float)
+        else:
+            dir2 = np.array(di,dtype=float)
         nor1 = np.linalg.norm(dir1)
         nor2 = np.linalg.norm(dir2)
         cross_product = dir1[0] * dir2[1] - dir1[1] * dir2[0]

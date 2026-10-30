@@ -30,7 +30,8 @@ def main():
     mats = []
     player = Classes.Player([230,240])
     glClearColor(0.1,0.5,0.4,1.0)
-    start_button = Classes.Button("START",440,510,100,50)
+    start_button = Classes.Button("SIMULATION MODE",280,510,200,50)
+    start_button_2 = Classes.Button("GAME MODE",640,510,150,50)
     restart_button = Classes.Button("PLAY AGAIN",440,510,150,80)
     welcome_text = Classes.Label("WELCOME TO RAY TRACER",50,50,1000,400)
     game_over_text = Classes.Label("GAME OVER",50,50,800,400)
@@ -63,6 +64,10 @@ def main():
                 if(scene==0):
                     if(start_button.is_close(mouse_pos)):
                         scene = 1
+                        states.game_mode = 1
+                    elif(start_button_2.is_close(mouse_pos)):
+                        scene = 1
+                        states.game_mode = 2
                 elif(scene==1):
                     if(event.button in (4,5,6,7)):
                         continue
@@ -103,9 +108,9 @@ def main():
                         if drag_test.dragging:
                             drag_test.move_to(mouse_pos)
                         if drag_test.rotating:
-                            angle = drag_test.angle_bet([mouse_pos[0]-drag_test.drag.mid[0],mouse_pos[1]-drag_test.drag.mid[1]],prev)
+                            angle = drag_test.angle_bet([mouse_pos.x-drag_test.drag.mid.x,mouse_pos.y-drag_test.drag.mid.y],prev)
                             drag_test.rotate(angle)
-                            prev = [mouse_pos[0]-drag_test.drag.mid[0],mouse_pos[1]-drag_test.drag.mid[1]]
+                            prev = [mouse_pos.x-drag_test.drag.mid.x,mouse_pos.y-drag_test.drag.mid.y]
             elif(event.type==pygame.MOUSEBUTTONUP):
                 if(scene==1):
                     for drag_test in drags:
@@ -142,10 +147,12 @@ def main():
                                 mats.remove(mat)
         if(scene==0):
             start_button.draw()
+            start_button_2.draw()
             welcome_text.draw()
 
         elif(scene==1):
-            player.move()
+            if(states.game_mode==2):
+                player.move()
             for mat in mats:
                 mat.draw()
             for drag in drags:
@@ -177,7 +184,7 @@ def main():
                 for mat in mats:
                     if(mat.is_point_inside(ray.start)!=mat.is_point_inside(ray.end)):
                         ray.change_dir(mat.refract(ray))
-                if(player.is_colliding(ray)):
+                if(states.game_mode==2 and player.is_colliding(ray)):
                     player.health -= 10
                     rays.remove(ray)
                     if(player.health<=0):
@@ -189,8 +196,8 @@ def main():
                         break
                     continue
                 ray.move(dt)
-            player.draw()
-            print(player.health)
+            if(states.game_mode==2):
+                player.draw()
             for shooter in shooters:
                 shooter.draw()
             for drag in drags:
